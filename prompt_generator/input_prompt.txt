@@ -1,0 +1,1 @@
+I want to make a prompt which gives me json output on name, age, and phone number. All three of these are to be generated randomly.
