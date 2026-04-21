@@ -21,3 +21,13 @@ def convert_rate(rate:float):
         rate (float): Annual rate, in decimal form (0.12 instead of 12%)
     """
     return rate/12
+
+@tool
+def format_currency(value: float) -> str:
+    """
+    Formats number into INR currency with 2 decimal places.
+    Use this function after EMI calculation, to show approximate cost per month (if needed).
+    Args:
+        value (float): The value to format
+    """
+    return f"₹{value:,.2f}"
