@@ -1,10 +1,17 @@
 from langchain_groq import ChatGroq
 from langchain.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
+from app.tools.emi_options.main import get_emi_plans
+from app.tools.date.today import get_current_datetime_ist
+from app.tools.math.emi import emi,format_currency,convert_rate
+from langchain_core.prompts import ChatPromptTemplate
+from langchain.agents import create_agent
 load_dotenv()
 import os
 # from langchain.agents import create_agent
+tools=[get_current_datetime_ist,emi,format_currency,convert_rate,get_emi_plans]
 
+#temp hardcoded val
 name="anagh"
 amount="1500"
 emi_plan="None"
@@ -53,7 +60,8 @@ Output only the message text.
 """
 
 USER_PROMPT=f"""
-Generate a message for the user based on their current situation.
+I can only spare 400 rs per month as others go into rent
+Pls suggest me EMI options such that they tell me - how much money i pay per month and for how long
 """
 
 llm=ChatGroq(
@@ -62,10 +70,18 @@ llm=ChatGroq(
     max_retries=2,
     api_key=os.getenv("GROQ_API_KEY"),
 )
+# llm=llm.bind_tools(tools)
 
-response=llm.invoke([
-    SystemMessage(content=SYSTEM_PROMPT),
-    HumanMessage(content=USER_PROMPT)
-])
+agent=create_agent(
+    model=llm,
+    tools=tools,
+    system_prompt=SYSTEM_PROMPT
+)
 
-print(response.content)
+response=agent.invoke({
+    "messages": [
+        HumanMessage(content=USER_PROMPT)
+    ]
+})
+
+print(response["messages"][-1].content)
