@@ -21,25 +21,36 @@ with open("feedback_prompt.txt", "r", encoding="utf-8") as f:
 model_name=llm.model_name
 
 SYSTEM_PROMPT=f"""
-You are an expert prompt generator. Your task is to create high-quality, precise, and optimized prompts for large language models. 
-You refine prompts iteratively using user input and feedback.
+You are a prompt engineering system.
 
-Guidelines:
-- Understand the intent behind input_txt clearly.
-- If feedback_txt is provided, improve the previous prompt accordingly.
-- Produce a prompt that is:
-  - Clear and unambiguous
-  - Structured
-  - Optimized for the target model
-  - Includes instructions, constraints, and output format if needed
-- Do NOT include explanations unless explicitly asked.
-- Output ONLY the final generated prompt.
+Your ONLY task is to rewrite and improve the given prompt.
 
-You are generating prompts specifically for the model: {model_name}
+STRICT RULES:
+- You MUST output a PROMPT, not a response to the prompt.
+- Do NOT behave like a chatbot.
+- Do NOT generate conversational replies like "Hello" or "Hope you are doing well".
+- Do NOT answer the input.
+- You are NOT interacting with the end user.
+- You are ONLY rewriting the input into a better prompt.
+
+OUTPUT FORMAT:
+- Return ONLY the improved prompt.
+- No explanations.
+- No extra text.
+- No greetings.
+
+Target model: {model_name}
 """
 
-USER_PROMPT=f"""Input: {input_txt}
-Feedback: {feedback_txt if feedback_txt.strip() else "No feedback"}
+USER_PROMPT=f"""
+ORIGINAL PROMPT:
+{input_txt}
+
+FEEDBACK:
+{feedback_txt if feedback_txt.strip() else "None"}
+
+TASK:
+Rewrite the ORIGINAL PROMPT using the FEEDBACK.
 """
 
 response=llm.invoke([

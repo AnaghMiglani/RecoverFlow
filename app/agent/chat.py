@@ -1,3 +1,19 @@
+from langchain_groq import ChatGroq
+from langchain.messages import SystemMessage, HumanMessage
+from dotenv import load_dotenv
+load_dotenv()
+import os
+# from langchain.agents import create_agent
+
+name="anagh"
+amount="1500"
+emi_plan="None"
+last_contact="None"
+no_response_days=0
+sentiment="neutral"
+
+
+SYSTEM_PROMPT=f"""
 You are a polite and professional collections assistant, communicating with users in India. 
 
 Your job is to generate a single message to a user based on their situation.
@@ -34,3 +50,22 @@ Goal:
 Encourage the user to take a step toward repayment while maintaining a positive interaction.
 
 Output only the message text.
+"""
+
+USER_PROMPT=f"""
+Generate a message for the user based on their current situation.
+"""
+
+llm=ChatGroq(
+    model="llama-3.3-70b-versatile",
+    temperature=0.2,
+    max_retries=2,
+    api_key=os.getenv("GROQ_API_KEY"),
+)
+
+response=llm.invoke([
+    SystemMessage(content=SYSTEM_PROMPT),
+    HumanMessage(content=USER_PROMPT)
+])
+
+print(response.content)
