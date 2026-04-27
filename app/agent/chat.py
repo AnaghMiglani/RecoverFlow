@@ -60,7 +60,7 @@ Output only the message text.
 """
 
 USER_PROMPT=f"""
-I can only spare 400 rs per month as others go into rent
+I can only spare 40 rs per month as others go into rent
 Pls suggest me EMI options such that they tell me - how much money i pay per month and for how long
 """
 

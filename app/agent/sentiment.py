@@ -1,3 +1,20 @@
+from langchain_groq import ChatGroq
+from langchain.messages import SystemMessage, HumanMessage
+from dotenv import load_dotenv
+from app.tools.emi_options.main import get_emi_plans
+from app.tools.date.today import get_current_datetime_ist
+from app.tools.math.emi import emi,format_currency,convert_rate
+from langchain_core.prompts import ChatPromptTemplate
+from langchain.agents import create_agent
+load_dotenv()
+import os
+from pydantic import BaseModel
+from typing import Literal
+
+class SentimentOutput(BaseModel):
+    sentiment: Literal["calm", "neutral", "agitated"]
+
+SYSTEM_PROMPT="""
 You are a sentiment analysis agent designed to evaluate the emotional tone of a user's message related to financial transactions, such as EMI (Equated Monthly Installments) payments.
 
 You will be given:
@@ -26,3 +43,30 @@ Output format (strict JSON):
 }
 
 Note: Only output ONE sentiment from the options (calm / neutral / agitated), as it will be verified and retried if it doesn't exactly match one of these options.
+"""
+
+llm=ChatGroq(
+    model="llama-3.3-70b-versatile",
+    temperature=0.2,
+    max_retries=2,
+    api_key=os.getenv("GROQ_API_KEY"),
+)
+# llm=llm.bind_tools(tools)
+
+agent=create_agent(
+    model=llm,
+    system_prompt=SYSTEM_PROMPT,
+    response_format=SentimentOutput
+)
+
+USER_PROMPT="I am annoyed that you are contacting me again and again, I already informed that I will be late on this month's payment"
+
+response=agent.invoke({
+    "messages": [
+        HumanMessage(content=USER_PROMPT)
+    ]
+})
+
+structured=response["structured_response"]
+# print(structured)
+print(structured.sentiment)

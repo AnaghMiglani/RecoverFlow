@@ -1,1 +1,1 @@
-I want numbers to be Indian Numbers starting from +91, also include examples
+I want examples to be present, which should be related to finanaical transactions, similar to EMI
