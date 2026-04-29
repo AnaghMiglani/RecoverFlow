@@ -1,4 +1,7 @@
-def chat_ai(name:str,amount:str,emi_plan:str,last_contact:str,no_response_days:int,sentiment:str,user_prompt:str):
+from langgraph.checkpoint.memory import InMemorySaver
+checkpointer=InMemorySaver()
+
+def chat_ai(name:str,amount:str,emi_plan:str,last_contact:str,no_response_days:int,sentiment:str,user_prompt:str,thread_id:str):
     from langchain_groq import ChatGroq
     from langchain.messages import SystemMessage,HumanMessage
     from dotenv import load_dotenv
@@ -8,7 +11,6 @@ def chat_ai(name:str,amount:str,emi_plan:str,last_contact:str,no_response_days:i
     from langchain_core.prompts import ChatPromptTemplate
     from langchain.agents import create_agent
     from langchain.agents.middleware import SummarizationMiddleware
-    from langgraph.checkpoint.memory import InMemorySaver
     from langchain_core.runnables import RunnableConfig
     import os
     import json
@@ -70,8 +72,6 @@ Output only the message text.
         api_key=os.getenv("GROQ_API_KEY"),
     )
 
-    checkpointer=InMemorySaver()
-
     agent=create_agent(
         model=llm,
         tools=tools,
@@ -86,7 +86,7 @@ Output only the message text.
         checkpointer=checkpointer
     )
 
-    config:RunnableConfig={"configurable":{"thread_id":"1"}}
+    config:RunnableConfig={"configurable":{"thread_id":thread_id}}
 
     response=agent.invoke({
         "messages":[
@@ -115,5 +115,5 @@ I can only spare 40 rs per month as others go into rent
 Pls suggest me EMI options such that they tell me - how much money i pay per month and for how long
 """
 
-    result=chat_ai(name,amount,emi_plan,last_contact,no_response_days,sentiment,user_prompt)
+    result=chat_ai(name,amount,emi_plan,last_contact,no_response_days,sentiment,user_prompt,"1")
     print(result)

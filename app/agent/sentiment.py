@@ -2,10 +2,6 @@ def sentiment_analysis(message:str):
     from langchain_groq import ChatGroq
     from langchain.messages import SystemMessage, HumanMessage
     from dotenv import load_dotenv
-    from app.tools.emi_options.main import get_emi_plans
-    from app.tools.date.today import get_current_datetime_ist
-    from app.tools.math.emi import emi,format_currency,convert_rate
-    from langchain_core.prompts import ChatPromptTemplate
     from langchain.agents import create_agent
     load_dotenv()
     import os
