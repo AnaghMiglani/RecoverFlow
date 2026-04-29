@@ -1,0 +1,40 @@
+{
+  "v": 4,
+  "ts": "2026-04-29T15:25:52.151279+00:00",
+  "id": "1f143dfb-52bd-6556-8005-eeb773eba7c2",
+  "channel_versions": {
+    "__start__": "00000000000000000000000000000002.0.9371833178260336",
+    "messages": "00000000000000000000000000000007.0.0942229898131357",
+    "branch:to:SummarizationMiddleware.before_model": "00000000000000000000000000000006.0.9880782188971022",
+    "branch:to:model": "00000000000000000000000000000007.0.0942229898131357",
+    "__pregel_tasks": "00000000000000000000000000000005.0.3195272168667933"
+  },
+  "versions_seen": {
+    "__input__": {},
+    "__start__": {
+      "__start__": "00000000000000000000000000000001.0.4879538589540686"
+    },
+    "SummarizationMiddleware.before_model": {
+      "branch:to:SummarizationMiddleware.before_model": "00000000000000000000000000000005.0.3195272168667933"
+    },
+    "model": {
+      "branch:to:model": "00000000000000000000000000000006.0.9880782188971022"
+    },
+    "tools": {}
+  },
+  "updated_channels": [
+    "messages"
+  ],
+  "channel_values": {
+    "messages": [
+      "content='\\nI can only spare 40 rs per month as others go into rent\\nPls suggest me EMI options such that they tell me - how much money i pay per month and for how long\\n' additional_kwargs={} response_metadata={} id='de223afd-0478-4d5a-ba1e-e0259e21b9b3'",
+      "content=\"I completely understand that you have limited funds available for repayment. Considering your spare amount of \u20b940 per month, I'd like to suggest a few EMI options for you. \\n\\n\" additional_kwargs={'tool_calls': [{'id': '9cb13jn3y', 'function': {'arguments': '{\"rate\":0.12}', 'name': 'covert_rate_from_annual_to_monthly'}, 'type': 'function'}, {'id': 'cswec2nxe', 'function': {'arguments': '{\"principal\":1500,\"rate\":0.01,\"tenure\":48}', 'name': 'emi'}, 'type': 'function'}, {'id': 'fg4450kgg', 'function': {'arguments': '{\"value\":40}', 'name': 'format_currency'}, 'type': 'function'}, {'id': '4ecjntngw', 'function': {'arguments': '{}', 'name': 'get_emi_plans'}, 'type': 'function'}]} response_metadata={'token_usage': {'completion_tokens': 109, 'prompt_tokens': 1246, 'total_tokens': 1355, 'completion_time': 0.378850958, 'completion_tokens_details': None, 'prompt_time': 0.1485731, 'prompt_tokens_details': None, 'queue_time': 0.172232796, 'total_time': 0.527424058}, 'model_name': 'llama-3.3-70b-versatile', 'system_fingerprint': 'fp_3272ea2d91', 'service_tier': 'on_demand', 'finish_reason': 'tool_calls', 'logprobs': None, 'model_provider': 'groq'} id='lc_run--019dd9d8-b251-7a81-9fbd-38c4fad98877-0' tool_calls=[{'name': 'covert_rate_from_annual_to_monthly', 'args': {'rate': 0.12}, 'id': '9cb13jn3y', 'type': 'tool_call'}, {'name': 'emi', 'args': {'principal': 1500, 'rate': 0.01, 'tenure': 48}, 'id': 'cswec2nxe', 'type': 'tool_call'}, {'name': 'format_currency', 'args': {'value': 40}, 'id': 'fg4450kgg', 'type': 'tool_call'}, {'name': 'get_emi_plans', 'args': {}, 'id': '4ecjntngw', 'type': 'tool_call'}] invalid_tool_calls=[] usage_metadata={'input_tokens': 1246, 'output_tokens': 109, 'total_tokens': 1355}",
+      "content='0.01' name='covert_rate_from_annual_to_monthly' id='f3b0e768-ee5d-4ca8-886a-f3e829a9aa0d' tool_call_id='9cb13jn3y'",
+      "content='39.50075314789163' name='emi' id='758130cd-8a3f-494b-a5a8-8cdf58d0ddbf' tool_call_id='cswec2nxe'",
+      "content='\u20b940.00' name='format_currency' id='02f2edd9-fe5c-470e-8ac1-45711fdea5ea' tool_call_id='fg4450kgg'",
+      "content='[{\"tenure_months\": 1, \"interest_pa\": \"0%\"}, {\"tenure_months\": 2, \"interest_pa\": \"2%\"}, {\"tenure_months\": 3, \"interest_pa\": \"5%\"}, {\"tenure_months\": 6, \"interest_pa\": \"8%\"}, {\"tenure_months\": 9, \"interest_pa\": \"10%\"}, {\"tenure_months\": 12, \"interest_pa\": \"12%\"}, {\"tenure_months\": 16, \"interest_pa\": \"14%\"}, {\"tenure_months\": 20, \"interest_pa\": \"15%\"}, {\"tenure_months\": 24, \"interest_pa\": \"16%\"}]' name='get_emi_plans' id='dfd6bfcd-d463-4203-a691-d3593f6de825' tool_call_id='4ecjntngw'",
+      "content=\"I understand that you can only spare \u20b940 per month. Considering your constraint, I've calculated an EMI plan for you. Since you can only pay \u20b940 per month, it would take approximately 38 months to pay off the debt of \u20b91500. Would you like to discuss a possible installment plan to help you pay off your debt?\" additional_kwargs={} response_metadata={'token_usage': {'completion_tokens': 71, 'prompt_tokens': 1509, 'total_tokens': 1580, 'completion_time': 0.232414787, 'completion_tokens_details': None, 'prompt_time': 0.17041732, 'prompt_tokens_details': None, 'queue_time': 0.078088076, 'total_time': 0.402832107}, 'model_name': 'llama-3.3-70b-versatile', 'system_fingerprint': 'fp_dae98b5ecb', 'service_tier': 'on_demand', 'finish_reason': 'stop', 'logprobs': None, 'model_provider': 'groq'} id='lc_run--019dd9d8-b650-7e60-9af0-c8b22d0bd18a-0' tool_calls=[] invalid_tool_calls=[] usage_metadata={'input_tokens': 1509, 'output_tokens': 71, 'total_tokens': 1580}"
+    ],
+    "__pregel_tasks": []
+  }
+}
