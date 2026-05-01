@@ -1,0 +1,348 @@
+import math
+
+from langchain_core.tools import tool
+
+
+def monthly_rate(rate):
+    return rate / (12 * 100)
+
+
+def emi(principal, rate, tenure):
+    r = monthly_rate(rate)
+    if r == 0:
+        return principal / tenure
+    return principal * r * (1 + r)**tenure / ((1 + r)**tenure - 1)
+
+
+def interest_for_month(principal, rate):
+    return principal * monthly_rate(rate)
+
+
+def principal_after_n_months(principal, rate, tenure, months_paid):
+    r = monthly_rate(rate)
+    e = emi(principal, rate, tenure)
+    p = principal
+
+    for _ in range(months_paid):
+        interest = p * r
+        principal_paid = e - interest
+        p -= principal_paid
+
+    return max(p, 0)
+
+
+def projection_if_no_min_payment(principal, rate, months):
+    r = monthly_rate(rate)
+    p = principal
+
+    for _ in range(months):
+        p += p * r
+
+    return p
+
+@tool
+def loan_summary(principal: float, rate:float, tenure:int, current_month:int) -> dict:
+    """
+        PURPOSE:
+        --------
+        Compute a complete snapshot of a loan at a given month, including EMI,
+        interest due for the current month, minimum payment required to avoid
+        increase in principal, remaining principal, and projected increase if
+        no minimum payment is made.
+
+        DEFINITIONS (VERY IMPORTANT):
+        ----------------------------
+        principal:
+            The original loan amount borrowed by the user at the start of the loan.
+            Unit: currency (e.g., INR, USD)
+            Example: 100000
+
+        rate:
+            Annual interest rate expressed as a percentage.
+            This is NOT monthly. It is converted internally to monthly.
+            Example: 12 means 12% per annum.
+
+        tenure:
+            Total duration of the loan in months.
+            Example: 12 means 1 year, 24 means 2 years.
+
+        current_month:
+            The month number in the loan lifecycle for which the summary is required.
+            Starts from 1.
+            Example:
+                1 → first month
+                6 → sixth month
+
+        INTERNAL INTERPRETATION:
+        ------------------------
+        - Interest is applied monthly.
+        - EMI (Equated Monthly Installment) is fixed across the loan.
+        - Each EMI consists of:
+            interest component + principal component
+        - Interest is always paid first, then principal.
+
+        LOGIC FLOW:
+        -----------
+        1. Clamp current_month so it does not exceed tenure.
+        2. Compute remaining principal after (current_month - 1) EMIs.
+        3. Compute interest for current month using remaining principal.
+        4. Compute EMI using original principal, rate, and tenure.
+        5. Compute remaining tenure.
+        6. Project future principal growth assuming NO minimum payment is made.
+           Projection is limited to min(remaining_tenure, 6 months).
+        7. Calculate increase in principal due to non-payment.
+
+        RETURN VALUES (STRUCTURED OUTPUT):
+        ----------------------------------
+        The function returns a dictionary with:
+
+        month_number:
+            The evaluated month in the loan cycle.
+
+        emi:
+            Fixed monthly EMI amount required to repay the loan fully.
+
+        interest_this_month:
+            Interest charged for the current month on remaining principal.
+
+        minimum_payment:
+            Minimum amount required to prevent principal from increasing.
+            NOTE: This is equal to interest_this_month.
+
+        remaining_principal:
+            Outstanding loan amount after previous payments.
+
+        projected_increase_if_no_min_payment:
+            Increase in principal if user does NOT pay even the minimum amount.
+            Calculated over projection_months duration.
+
+        projection_months:
+            Number of months used for projection (≤ 6).
+
+        IMPORTANT FINANCIAL RULES:
+        --------------------------
+        - If payment < minimum_payment:
+            principal will INCREASE.
+        - If payment == minimum_payment:
+            principal remains unchanged.
+        - If payment > minimum_payment:
+            principal decreases.
+
+        LLM USAGE INSTRUCTIONS (CRITICAL):
+        ---------------------------------
+        Use this function when:
+            - User asks about loan status
+            - User asks about EMI
+            - User asks "how much should I pay"
+            - User asks about interest or outstanding balance
+
+        Do NOT use this function when:
+            - User asks hypothetical "what if I pay X"
+              (use simulate_principal instead)
+
+        INTERPRETATION RULES FOR LLM:
+        -----------------------------
+        - Treat all numeric outputs as ground truth.
+        - Do NOT recompute values.
+        - Use "minimum_payment" to guide user advice.
+        - If projected_increase_if_no_min_payment > 0:
+            warn user about loan growth.
+
+        EXAMPLE OUTPUT:
+        ---------------
+        {
+            "month_number": 3,
+            "emi": 8560.45,
+            "interest_this_month": 4200.12,
+            "minimum_payment": 4200.12,
+            "remaining_principal": 98200.50,
+            "projected_increase_if_no_min_payment": 1250.75,
+            "projection_months": 6
+        }
+
+        SUMMARY:
+        --------
+        This function provides a deterministic financial snapshot.
+        It MUST be used as the single source of truth for loan calculations.
+        LLM should only explain the results, not modify or reinterpret them.
+    """
+    current_month = min(current_month, tenure)
+
+    current_principal = principal_after_n_months(
+        principal, rate, tenure, current_month - 1
+    )
+
+    monthly_interest = interest_for_month(current_principal, rate)
+    emi_value = emi(principal, rate, tenure)
+
+    remaining_tenure = tenure - current_month + 1
+    projection_months = min(remaining_tenure, math.ceil(remaining_tenure/20),6)
+
+    projected_principal = projection_if_no_min_payment(
+        current_principal, rate, projection_months
+    )
+
+    increase = projected_principal - current_principal
+
+    return {
+        "month_number": current_month,
+        "emi": round(emi_value, 2),
+        "interest_this_month": round(monthly_interest, 2),
+        "minimum_payment": round(monthly_interest, 2),
+        "remaining_principal": round(current_principal, 2),
+        "projected_increase_if_no_min_payment": round(increase, 2),
+        "projection_months": projection_months
+    }
+
+@tool
+def simulate_principal(principal:float, rate:float, payment:float) -> dict:
+    """
+        PURPOSE:
+        --------
+        Simulate how the loan principal changes if a user makes a specific payment
+        in the current month. This is a hypothetical calculation and does NOT modify
+        actual loan state.
+
+        DEFINITIONS (VERY IMPORTANT):
+        ----------------------------
+        principal:
+            Current outstanding loan amount before making any payment this month.
+            Unit: currency (e.g., INR, USD)
+            Example: 100000
+
+        rate:
+            Annual interest rate expressed as a percentage.
+            This is converted internally to a monthly rate.
+            Example: 12 means 12% per annum.
+
+        payment:
+            Amount the user intends to pay in the current month.
+            This is a hypothetical value provided by the user.
+            Example: 1000, 5000, etc.
+
+        INTERNAL INTERPRETATION:
+        ------------------------
+        - Interest is applied monthly.
+        - Monthly interest = principal * (rate / 12 / 100)
+        - Payment is applied in the following order:
+            1. Interest is paid first
+            2. Remaining amount (if any) reduces principal
+
+        LOGIC FLOW:
+        -----------
+        1. Compute monthly interest on current principal.
+        2. Compare payment with interest:
+            - If payment >= interest:
+                principal decreases by (payment - interest)
+            - If payment < interest:
+                unpaid interest is added to principal
+        3. Ensure principal never goes below zero.
+        4. Compute net change in principal.
+
+        RETURN VALUES (STRUCTURED OUTPUT):
+        ----------------------------------
+        The function returns a dictionary with:
+
+        old_principal:
+            Principal before applying payment.
+
+        new_principal:
+            Principal after applying payment.
+
+        change:
+            Difference between new and old principal.
+            Interpretation:
+                positive  → principal increased (bad)
+                zero      → no change
+                negative  → principal reduced (good)
+
+        IMPORTANT FINANCIAL RULES:
+        --------------------------
+        - If payment < interest:
+            principal increases (loan grows)
+        - If payment == interest:
+            principal remains unchanged
+        - If payment > interest:
+            principal decreases
+
+        LLM USAGE INSTRUCTIONS (CRITICAL):
+        ---------------------------------
+        Use this function when:
+            - User asks hypothetical questions like:
+                "What if I pay ₹X?"
+                "If I pay 5000 this month, what happens?"
+                "Will my loan reduce if I pay this amount?"
+
+        Do NOT use this function when:
+            - User asks for actual loan status
+              (use loan_summary instead)
+
+        INTERPRETATION RULES FOR LLM:
+        -----------------------------
+        - Treat returned values as exact and authoritative.
+        - Do NOT recompute interest or principal.
+        - Use "change" to explain outcome:
+            if change > 0 → warn user about increase
+            if change < 0 → highlight reduction
+        - Clearly state that this is a simulation.
+
+        EXAMPLE OUTPUT:
+        ---------------
+        {
+            "old_principal": 100000,
+            "new_principal": 103000,
+            "change": 3000
+        }
+
+        SUMMARY:
+        --------
+        This function is used for hypothetical "what-if" analysis.
+        It provides a deterministic and reliable estimate of how a specific
+        payment affects the loan principal for the current month.
+        The LLM must only explain the result and must not alter calculations.
+    """
+    interest = principal * (rate / (12 * 100))
+
+    if payment >= interest:
+        new_principal = principal - (payment - interest)
+    else:
+        new_principal = principal + (interest - payment)
+
+    new_principal = max(new_principal, 0)
+    change = new_principal - principal
+
+
+    return {
+        "old_principal": round(principal, 2),
+        "new_principal": round(new_principal, 2),
+        "change": round(change, 2)
+    }
+
+
+def plan_after_custom_payments(principal, rate, tenure, current_month, payment, months):
+    r = rate / (12 * 100)
+
+    p = principal_after_n_months(principal, rate, tenure, current_month - 1)
+
+    for _ in range(months):
+        interest = p * r
+
+        if payment >= interest:
+            p = p - (payment - interest)
+        else:
+            p = p + (interest - payment)
+
+        p = max(p, 0)
+
+    remaining_months = tenure - (current_month - 1) - months
+
+    if remaining_months <= 0 or p == 0:
+        new_emi = 0
+    else:
+        new_emi = emi(p, rate, remaining_months)
+
+    return {
+        "principal_after_custom_period": round(p, 2),
+        "remaining_months": remaining_months,
+        "new_emi": round(new_emi, 2)
+    }
