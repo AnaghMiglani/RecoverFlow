@@ -318,13 +318,150 @@ def simulate_principal(principal:float, rate:float, payment:float) -> dict:
         "change": round(change, 2)
     }
 
+@tool
+def plan_after_custom_payments(principal:float, rate:float, tenure:int, current_month:int, payment:float, months:int):
+    """
+    PURPOSE:
+    --------
+    Simulate a repayment strategy where the user pays a fixed custom amount
+    for a specified number of months, and then compute the required EMI for
+    the remaining tenure.
 
-def plan_after_custom_payments(principal, rate, tenure, current_month, payment, months):
+    This function models a two-phase repayment:
+        Phase 1 → custom payments (user-defined)
+        Phase 2 → recalculated EMI for remaining months
+
+    DEFINITIONS (VERY IMPORTANT):
+    ----------------------------
+    principal:
+        Original loan amount taken by the user.
+        Unit: currency (e.g., INR, USD)
+
+    rate:
+        Annual interest rate in percentage.
+        Example: 12 means 12% per annum.
+
+    tenure:
+        Total loan duration in months.
+
+    current_month:
+        Current month in loan lifecycle (starting from 1).
+
+    payment:
+        Fixed amount user plans to pay every month during the custom period.
+
+    months:
+        Number of months user will follow this custom payment plan.
+
+    INTERNAL INTERPRETATION:
+    ------------------------
+    - Interest is applied monthly.
+    - Monthly interest = principal * (rate / 12 / 100)
+    - Each payment is applied:
+        1. Interest is paid first
+        2. Remaining amount reduces principal
+    - If payment < interest:
+        unpaid interest increases principal
+    - If payment is large:
+        loan may close early
+
+    LOGIC FLOW:
+    -----------
+    1. Compute current principal based on loan progress.
+    2. Simulate "months" number of payments:
+        - Apply interest
+        - Apply payment
+        - Update principal
+        - Stop early if principal becomes zero
+    3. Track how many months were actually used.
+    4. Compute remaining tenure.
+    5. Recalculate EMI for remaining principal and months.
+    6. Detect if loan closed early.
+
+    RETURN VALUES (STRUCTURED OUTPUT):
+    ----------------------------------
+    principal_after_custom_period:
+        Remaining principal after applying custom payments.
+
+    remaining_months:
+        Months left in the loan after custom period.
+
+    new_emi:
+        EMI required to finish the loan in remaining months.
+        Will be 0 if loan is already closed.
+
+    loan_closed_early:
+        Boolean indicating whether loan was fully repaid during custom period.
+
+    months_to_close:
+        Number of months required to fully close loan (only if closed early).
+
+    closed_in_month_number:
+        Absolute loan month in which loan gets closed.
+
+    IMPORTANT FINANCIAL RULES:
+    --------------------------
+    - If payment < interest:
+        loan grows (negative amortization)
+    - If payment = interest:
+        principal stays same
+    - If payment > interest:
+        principal reduces
+    - If payment is very high:
+        loan may close before planned months
+
+    LLM USAGE INSTRUCTIONS (CRITICAL):
+    ---------------------------------
+    Use this function when:
+        - User asks:
+            "If I pay ₹X for Y months..."
+            "I can only pay this amount for next few months..."
+            "What happens if I follow this plan?"
+
+    Do NOT use this function when:
+        - User asks about single payment impact
+          (use simulate_principal)
+        - User asks about current loan state
+          (use loan_summary)
+
+    INTERPRETATION RULES FOR LLM:
+    -----------------------------
+    - Treat outputs as exact values.
+    - Do NOT recompute EMI or principal.
+    - If loan_closed_early = True:
+        clearly tell user loan ends early.
+    - If new_emi increases:
+        warn user that low payments now increase burden later.
+    - Always explain both short-term and long-term impact.
+
+    EXAMPLE OUTPUT:
+    ---------------
+    {
+        "principal_after_custom_period": 85000,
+        "remaining_months": 9,
+        "new_emi": 9800,
+        "loan_closed_early": False,
+        "months_to_close": None,
+        "closed_in_month_number": None
+    }
+
+    SUMMARY:
+    --------
+    This function enables multi-month repayment planning and helps evaluate
+    trade-offs between short-term affordability and long-term cost.
+    It is a deterministic financial simulator and must be treated as
+    the source of truth for such scenarios.
+    """
     r = rate / (12 * 100)
 
     p = principal_after_n_months(principal, rate, tenure, current_month - 1)
 
-    for _ in range(months):
+    months_used = 0
+
+    for i in range(months):
+        if p <= 0:
+            break
+
         interest = p * r
 
         if payment >= interest:
@@ -333,16 +470,22 @@ def plan_after_custom_payments(principal, rate, tenure, current_month, payment, 
             p = p + (interest - payment)
 
         p = max(p, 0)
+        months_used += 1
 
-    remaining_months = tenure - (current_month - 1) - months
+    remaining_months = tenure - (current_month - 1) - months_used
 
     if remaining_months <= 0 or p == 0:
         new_emi = 0
     else:
         new_emi = emi(p, rate, remaining_months)
 
+    loan_closed = p == 0
+
     return {
         "principal_after_custom_period": round(p, 2),
         "remaining_months": remaining_months,
-        "new_emi": round(new_emi, 2)
+        "new_emi": round(new_emi, 2),
+        "loan_closed_early": loan_closed,
+        "months_to_close": months_used if loan_closed else None,
+        "closed_in_month_number": (current_month + months_used - 1) if loan_closed else None
     }
