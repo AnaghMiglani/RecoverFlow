@@ -21,7 +21,7 @@ def chat_ai(name: str, rate: float, principal: float, tenure: int, sentiment: st
 
     for i in history:
         history_text.append(f"{i['time']}: {i['system_message']}")
-    history_text = "\n".join(history_text else "None"
+    history_text = "\n".join(history_text) if history_text else "None"
 
 
     load_dotenv()
