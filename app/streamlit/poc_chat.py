@@ -1,11 +1,15 @@
 import streamlit as st
 import uuid
+from datetime import datetime, timedelta
 from app.agent.chat import chat_ai
+from app.tools.emi_calc.main import loan_summary
+from app.agent.guardrail import guardrail_llm   # you said you'll adjust import
 
 
 def init_state():
     if "initialized" not in st.session_state:
         st.session_state.initialized = False
+
     if "user" not in st.session_state:
         st.session_state.user = {
             "name": "",
@@ -15,11 +19,22 @@ def init_state():
             "current_month": 1,
             "sentiment": "neutral"
         }
+
     if "chat" not in st.session_state:
         st.session_state.chat = []
+
     if "thread_id" not in st.session_state:
         st.session_state.thread_id = str(uuid.uuid4())
 
+    if "history" not in st.session_state:
+        st.session_state.history = []
+
+    if "init_date" not in st.session_state:
+        st.session_state.init_date = None
+
+    # 🔥 CHANGED: track last EMI message month
+    if "last_emi_msg_month" not in st.session_state:
+        st.session_state.last_emi_msg_month = None
 
 def user_form():
     with st.form("user_details"):
@@ -41,6 +56,9 @@ def user_form():
                 "current_month": current_month,
                 "sentiment": sentiment
             }
+
+            st.session_state.init_date = datetime.now()
+
             st.session_state.initialized = True
             st.rerun()
 
@@ -53,7 +71,22 @@ def simulation_panel():
     u["principal"] = st.number_input("Principal (₹)", value=u["principal"])
     u["rate"] = st.number_input("Rate (% per annum)", value=u["rate"])
     u["tenure"] = st.number_input("Tenure (months)", value=u["tenure"])
-    u["current_month"] = st.number_input("Current Month", value=u["current_month"])
+
+    new_month = st.number_input(
+        "Current Month",
+        min_value=u["current_month"],
+        max_value=u["tenure"],
+        value=min(u["current_month"], u["tenure"])
+    )
+
+    if new_month > u["current_month"]:
+        diff = new_month - u["current_month"]
+        st.session_state.init_date += timedelta(days=30 * diff)
+
+    u["current_month"] = new_month
+
+    st.write(f"Current Simulated Date: {st.session_state.init_date.strftime('%d-%m-%Y')}")
+
     u["sentiment"] = st.selectbox(
         "Sentiment",
         ["calm", "neutral", "agitated"],
@@ -63,8 +96,37 @@ def simulation_panel():
     st.session_state.user = u
 
 
+def send_auto_message():
+    user = st.session_state.user
+
+    data = loan_summary.invoke({
+        "principal": user["principal"],
+        "rate": user["rate"],
+        "tenure": user["tenure"],
+        "current_month": user["current_month"]
+    })
+
+    msg = f"Hello, your EMI for this month is ₹{data['emi']}. Please try to pay it. At minimum, ₹{data['minimum_payment']} will prevent your balance from increasing."
+
+    st.session_state.chat.append({
+        "role": "assistant",
+        "content": msg
+    })
+
+    st.session_state.history.append({
+        "time": user["current_month"],
+        "system_message": msg
+    })
+
+
 def chat_ui():
     st.subheader("Chat")
+
+    current_month = st.session_state.user["current_month"]
+
+    if st.session_state.last_emi_msg_month != current_month:
+        send_auto_message()
+        st.session_state.last_emi_msg_month = current_month
 
     for msg in st.session_state.chat:
         with st.chat_message(msg["role"]):
@@ -73,6 +135,16 @@ def chat_ui():
     user_input = st.chat_input("Type your message")
 
     if user_input:
+        safe = guardrail_llm(user_input)
+
+        if safe == 0:
+            st.session_state.chat.append({
+                "role": "assistant",
+                "content": "Your message violates policy. Please try again."
+            })
+            st.rerun()
+            return
+
         st.session_state.chat.append({"role": "user", "content": user_input})
 
         response = chat_ai(
@@ -83,7 +155,8 @@ def chat_ui():
             current_month=st.session_state.user["current_month"],
             sentiment=st.session_state.user["sentiment"],
             user_prompt=user_input,
-            thread_id=st.session_state.thread_id
+            thread_id=st.session_state.thread_id,
+            history=st.session_state.history
         )
 
         st.session_state.chat.append({"role": "assistant", "content": response})
@@ -93,12 +166,11 @@ def chat_ui():
 
 def main_layout():
     col1, col2 = st.columns([3, 1])
+    with col2:
+        simulation_panel()
 
     with col1:
         chat_ui()
-
-    with col2:
-        simulation_panel()
 
 
 def main():
