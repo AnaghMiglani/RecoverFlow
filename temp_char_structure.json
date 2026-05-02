@@ -1,45 +1,32 @@
 {
   "v": 4,
-  "ts": "2026-05-01T10:22:02.158569+00:00",
-  "id": "1f145479-8133-631e-802b-c8798a3073f9",
+  "ts": "2026-05-01T14:26:12.698988+00:00",
+  "id": "1f14569b-47a4-6238-8002-656988d3be5a",
   "channel_versions": {
-    "__start__": "00000000000000000000000000000037.0.5258666137553809",
-    "messages": "00000000000000000000000000000045.0.40299816335295624",
-    "branch:to:SummarizationMiddleware.before_model": "00000000000000000000000000000044.0.7796302758564931",
-    "branch:to:model": "00000000000000000000000000000045.0.40299816335295624",
-    "__pregel_tasks": "00000000000000000000000000000043.0.18940849822248274"
+    "__start__": "00000000000000000000000000000002.0.7142721266204801",
+    "messages": "00000000000000000000000000000004.0.3607166444730059",
+    "branch:to:SummarizationMiddleware.before_model": "00000000000000000000000000000003.0.6249480138134162",
+    "branch:to:model": "00000000000000000000000000000004.0.3607166444730059"
   },
   "versions_seen": {
     "__input__": {},
     "__start__": {
-      "__start__": "00000000000000000000000000000036.0.9928537876674007"
+      "__start__": "00000000000000000000000000000001.0.15754388031745215"
     },
     "SummarizationMiddleware.before_model": {
-      "branch:to:SummarizationMiddleware.before_model": "00000000000000000000000000000043.0.18940849822248274"
+      "branch:to:SummarizationMiddleware.before_model": "00000000000000000000000000000002.0.7142721266204801"
     },
     "model": {
-      "branch:to:model": "00000000000000000000000000000044.0.7796302758564931"
-    },
-    "tools": {}
+      "branch:to:model": "00000000000000000000000000000003.0.6249480138134162"
+    }
   },
   "updated_channels": [
     "messages"
   ],
   "channel_values": {
     "messages": [
-      "content='Here is a summary of the conversation to date:\\n\\n## SESSION INTENT\\n- Primary goal: Assist Anagh with their loan.\\n- Overall task: Provide loan-related information or assistance.\\n\\n## SUMMARY\\n- Anagh requested information about the impact of paying only \u20b95,000 this month on their loan.\\n- The AI simulated the impact of a reduced payment of \u20b95,000 and provided the following results:\\n  - New principal: 1000833.33\\n  - Change: 833.33\\n- The AI explained that the principal will increase by \u20b9833.33 because the interest for the month (\u20b95,833.33) is not fully covered by the payment, resulting in the remaining interest being added to the principal.\\n- Anagh asked about the long-term impact of not paying anything today.\\n- The AI provided a tool call to simulate the loan summary for the current month, which included information about the interest this month, minimum payment, and projected increase if no minimum payment is made.\\n\\n## ARTIFACTS\\n- Loan summary tool call: {\\'name\\': \\'loan_summary\\', \\'args\\': {\\'current_month\\': 1, \\'principal\\': 1000000, \\'rate\\': 7, \\'tenure\\': 120}, \\'id\\': \\'mccghb3w9\\', \\'type\\': \\'tool_call\\'}\\n- Loan summary result: {\"month_number\": 1, \"emi\": 11610.85, \"interest_this_month\": 5833.33, \"minimum_payment\": 5833.33, \"remaining_principal\": 1000000.0, \"projected_increase_if_no_min_payment\": 35514.4, \"projection_months\": 6}\\n\\n## NEXT STEPS\\n- Provide Anagh with information about the long-term impact of not paying anything today.\\n- Offer alternative solutions or a revised loan summary report based on Anagh\\'s response.' additional_kwargs={'lc_source': 'summarization'} response_metadata={} id='4a977d94-b636-4f75-af1c-c9571c65ae63'",
-      "content=\"If you don't pay anything this month, your principal will increase by \u20b95,833.33 (the interest for the month). Over the next 6 months, if you continue to not make the minimum payment, your principal could increase by \u20b935,514.40. This will not only increase the total amount you owe but also lead to a longer repayment period and more interest paid over the life of the loan.\" additional_kwargs={} response_metadata={'token_usage': {'completion_tokens': 86, 'prompt_tokens': 4265, 'total_tokens': 4351, 'completion_time': 0.296513999, 'completion_tokens_details': None, 'prompt_time': 0.380827539, 'prompt_tokens_details': None, 'queue_time': 0.054670885, 'total_time': 0.677341538}, 'model_name': 'llama-3.3-70b-versatile', 'system_fingerprint': 'fp_dae98b5ecb', 'service_tier': 'on_demand', 'finish_reason': 'stop', 'logprobs': None, 'model_provider': 'groq'} id='lc_run--019de2ef-295d-7c80-a694-fb2b9b330102-0' tool_calls=[] invalid_tool_calls=[] usage_metadata={'input_tokens': 4265, 'output_tokens': 86, 'total_tokens': 4351}",
-      "content='so how much per month will I have to pay, if i cannot pay today' additional_kwargs={} response_metadata={} id='ebd52666-3250-49aa-9ce8-8a1eac1fe91e'",
-      "content='' additional_kwargs={'tool_calls': [{'id': 'wtdnbefa9', 'function': {'arguments': '{\"current_month\":7,\"principal\":10035514.4,\"rate\":7,\"tenure\":114}', 'name': 'loan_summary'}, 'type': 'function'}]} response_metadata={'token_usage': {'completion_tokens': 38, 'prompt_tokens': 4533, 'total_tokens': 4571, 'completion_time': 0.113032597, 'completion_tokens_details': None, 'prompt_time': 0.42572437, 'prompt_tokens_details': None, 'queue_time': 0.16198838, 'total_time': 0.538756967}, 'model_name': 'llama-3.3-70b-versatile', 'system_fingerprint': 'fp_45180df409', 'service_tier': 'on_demand', 'finish_reason': 'tool_calls', 'logprobs': None, 'model_provider': 'groq'} id='lc_run--019de2f6-7153-7122-be15-8a882b05a3b1-0' tool_calls=[{'name': 'loan_summary', 'args': {'current_month': 7, 'principal': 10035514.4, 'rate': 7, 'tenure': 114}, 'id': 'wtdnbefa9', 'type': 'tool_call'}] invalid_tool_calls=[] usage_metadata={'input_tokens': 4533, 'output_tokens': 38, 'total_tokens': 4571}",
-      "content='{\"month_number\": 7, \"emi\": 120768.82, \"interest_this_month\": 56330.5, \"minimum_payment\": 56330.5, \"remaining_principal\": 9656656.95, \"projected_increase_if_no_min_payment\": 342950.42, \"projection_months\": 6}' name='loan_summary' id='e52ee320-976e-411d-b3b1-06cfef4b376a' tool_call_id='wtdnbefa9'",
-      "content=\"If you don't make a payment this month and the principal increases by \u20b935,514.40 over the next 6 months, your new EMI would be approximately \u20b912,076.88 per month for the remaining 114 months. However, please note that this calculation assumes the interest rate and loan tenure remain the same. It's essential to review your loan agreement and consult with your lender to determine the exact amount you'll need to pay each month.\" additional_kwargs={} response_metadata={'token_usage': {'completion_tokens': 94, 'prompt_tokens': 4534, 'total_tokens': 4628, 'completion_time': 0.34776373, 'completion_tokens_details': None, 'prompt_time': 0.282642885, 'prompt_tokens_details': None, 'queue_time': 0.160041684, 'total_time': 0.630406615}, 'model_name': 'llama-3.3-70b-versatile', 'system_fingerprint': 'fp_3272ea2d91', 'service_tier': 'on_demand', 'finish_reason': 'stop', 'logprobs': None, 'model_provider': 'groq'} id='lc_run--019de2f6-76be-7861-b16b-5d3e3297943f-0' tool_calls=[] invalid_tool_calls=[] usage_metadata={'input_tokens': 4534, 'output_tokens': 94, 'total_tokens': 4628}",
-      "content='and If i pay 50,000 today then?\\nwhat will I have to pay from next month' additional_kwargs={} response_metadata={} id='f642c37a-47c6-4132-bf60-9b87d6f76621'",
-      "content='' additional_kwargs={'tool_calls': [{'id': 'f09hcvzxa', 'function': {'arguments': '{\"payment\":50000,\"principal\":1000000,\"rate\":7}', 'name': 'simulate_principal'}, 'type': 'function'}]} response_metadata={'token_usage': {'completion_tokens': 30, 'prompt_tokens': 4718, 'total_tokens': 4748, 'completion_time': 0.060963891, 'completion_tokens_details': None, 'prompt_time': 0.254081441, 'prompt_tokens_details': None, 'queue_time': 0.055690671, 'total_time': 0.315045332}, 'model_name': 'llama-3.3-70b-versatile', 'system_fingerprint': 'fp_dae98b5ecb', 'service_tier': 'on_demand', 'finish_reason': 'tool_calls', 'logprobs': None, 'model_provider': 'groq'} id='lc_run--019de30f-1f60-70d1-8329-e494f8b5d877-0' tool_calls=[{'name': 'simulate_principal', 'args': {'payment': 50000, 'principal': 1000000, 'rate': 7}, 'id': 'f09hcvzxa', 'type': 'tool_call'}] invalid_tool_calls=[] usage_metadata={'input_tokens': 4718, 'output_tokens': 30, 'total_tokens': 4748}",
-      "content='{\"old_principal\": 1000000.0, \"new_principal\": 955833.33, \"change\": -44166.67}' name='simulate_principal' id='74f13508-4c81-48d7-bb5e-78c879f8ed1d' tool_call_id='f09hcvzxa'",
-      "content='' additional_kwargs={'tool_calls': [{'id': '9d7g2khf1', 'function': {'arguments': '{\"current_month\":2,\"principal\":955833.33,\"rate\":7,\"tenure\":119}', 'name': 'loan_summary'}, 'type': 'function'}]} response_metadata={'token_usage': {'completion_tokens': 37, 'prompt_tokens': 4408, 'total_tokens': 4445, 'completion_time': 0.085325398, 'completion_tokens_details': None, 'prompt_time': 0.235819863, 'prompt_tokens_details': None, 'queue_time': 0.055875395, 'total_time': 0.321145261}, 'model_name': 'llama-3.3-70b-versatile', 'system_fingerprint': 'fp_dae98b5ecb', 'service_tier': 'on_demand', 'finish_reason': 'tool_calls', 'logprobs': None, 'model_provider': 'groq'} id='lc_run--019de30f-22fe-7a62-8e3d-3a68c10c5447-0' tool_calls=[{'name': 'loan_summary', 'args': {'current_month': 2, 'principal': 955833.33, 'rate': 7, 'tenure': 119}, 'id': '9d7g2khf1', 'type': 'tool_call'}] invalid_tool_calls=[] usage_metadata={'input_tokens': 4408, 'output_tokens': 37, 'total_tokens': 4445}",
-      "content='{\"month_number\": 2, \"emi\": 11162.53, \"interest_this_month\": 5543.1, \"minimum_payment\": 5543.1, \"remaining_principal\": 950246.5, \"projected_increase_if_no_min_payment\": 33747.44, \"projection_months\": 6}' name='loan_summary' id='fb59d2c1-0bd7-467b-b313-482c81a4ae99' tool_call_id='9d7g2khf1'",
-      "content='If you pay \u20b950,000 today, your principal will decrease by \u20b944,166.67. From next month, your EMI would be approximately \u20b911,162.53 per month for the remaining 119 months.' additional_kwargs={} response_metadata={'token_usage': {'completion_tokens': 47, 'prompt_tokens': 4582, 'total_tokens': 4629, 'completion_time': 0.121709001, 'completion_tokens_details': None, 'prompt_time': 0.261856878, 'prompt_tokens_details': None, 'queue_time': 0.158117937, 'total_time': 0.383565879}, 'model_name': 'llama-3.3-70b-versatile', 'system_fingerprint': 'fp_3272ea2d91', 'service_tier': 'on_demand', 'finish_reason': 'stop', 'logprobs': None, 'model_provider': 'groq'} id='lc_run--019de30f-275f-7701-acf1-56e3b785335a-0' tool_calls=[] invalid_tool_calls=[] usage_metadata={'input_tokens': 4582, 'output_tokens': 47, 'total_tokens': 4629}"
-    ],
-    "__pregel_tasks": []
+      "content='hii?' additional_kwargs={} response_metadata={} id='59637ad2-16c0-4875-84fc-7dc3289e15bc'",
+      "content=\"Hello anagh, I'm here to help you with your loan. How can I assist you today? Would you like to know your current loan status or discuss a repayment plan?\" additional_kwargs={} response_metadata={'token_usage': {'completion_tokens': 37, 'prompt_tokens': 5634, 'total_tokens': 5671, 'completion_time': 0.169539436, 'completion_tokens_details': None, 'prompt_time': 0.280205814, 'prompt_tokens_details': None, 'queue_time': 0.15951146, 'total_time': 0.44974525}, 'model_name': 'llama-3.3-70b-versatile', 'system_fingerprint': 'fp_4f6d808339', 'service_tier': 'on_demand', 'finish_reason': 'stop', 'logprobs': None, 'model_provider': 'groq'} id='lc_run--019de3ee-cee2-7ad1-8080-d1d42e7a3dc9-0' tool_calls=[] invalid_tool_calls=[] usage_metadata={'input_tokens': 5634, 'output_tokens': 37, 'total_tokens': 5671}"
+    ]
   }
 }
