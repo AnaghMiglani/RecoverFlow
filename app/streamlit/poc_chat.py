@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from app.agent.chat import chat_ai
 from app.tools.emi_calc.main import loan_summary
 from app.agent.guardrail import guardrail_llm
+from app.agent.sentiment import sentiment_analysis
 
 
 def init_state():
@@ -43,7 +44,6 @@ def user_form():
         rate = st.number_input("Interest Rate (% per annum)", min_value=0.0, value=12.0)
         tenure = st.number_input("Tenure (months)", min_value=1, value=12)
         current_month = st.number_input("Current Month", min_value=1, value=1)
-        sentiment = st.selectbox("Sentiment", ["calm", "neutral", "agitated"])
 
         submitted = st.form_submit_button("Start Simulation")
 
@@ -54,7 +54,7 @@ def user_form():
                 "rate": rate,
                 "tenure": tenure,
                 "current_month": current_month,
-                "sentiment": sentiment
+                "sentiment": "neutral"
             }
 
             st.session_state.init_date = datetime.now()
@@ -86,10 +86,10 @@ def simulation_panel():
 
     st.write(f"Current Simulated Date: {st.session_state.init_date.strftime('%d-%m-%Y')}")
 
-    u["sentiment"] = st.selectbox(
+    st.text_input(
         "Sentiment",
-        ["calm", "neutral", "agitated"],
-        index=["calm", "neutral", "agitated"].index(u["sentiment"])
+        value=u["sentiment"],
+        disabled=True
     )
 
     st.session_state.user = u
@@ -163,6 +163,10 @@ def chat_ui():
             })
             st.rerun()
             return
+
+        # 🔥 Update sentiment automatically
+        sentiment = sentiment_analysis(user_input)
+        st.session_state.user["sentiment"] = sentiment
 
         st.session_state.chat.append({
             "role": "user",
