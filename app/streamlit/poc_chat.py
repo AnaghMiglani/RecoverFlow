@@ -6,6 +6,15 @@ from app.tools.emi_calc.main import loan_summary, principal_after_n_months
 from app.agent.guardrail import guardrail_llm
 from app.agent.sentiment import sentiment_analysis
 
+# for deploying on streamlit
+import os
+
+try:
+    import streamlit as st
+    if "GROQ_API_KEY" in st.secrets:
+        os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
+except:
+    pass
 
 
 def init_state():
