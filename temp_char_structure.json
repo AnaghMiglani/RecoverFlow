@@ -1,24 +1,24 @@
 {
   "v": 4,
-  "ts": "2026-05-03T08:07:31.929961+00:00",
-  "id": "1f146c72-2ab8-6a1a-8005-349eea588587",
+  "ts": "2026-05-03T08:23:26.810416+00:00",
+  "id": "1f146c95-bd2b-6be4-8005-6c822b3887eb",
   "channel_versions": {
-    "__start__": "00000000000000000000000000000002.0.18175409833984912",
-    "messages": "00000000000000000000000000000007.0.26460919135365923",
-    "branch:to:SummarizationMiddleware.before_model": "00000000000000000000000000000006.0.6670081846257369",
-    "branch:to:model": "00000000000000000000000000000007.0.26460919135365923",
-    "__pregel_tasks": "00000000000000000000000000000005.0.980855806607091"
+    "__start__": "00000000000000000000000000000002.0.9695886150119469",
+    "messages": "00000000000000000000000000000007.0.27320039545922614",
+    "branch:to:SummarizationMiddleware.before_model": "00000000000000000000000000000006.0.2779860737678642",
+    "branch:to:model": "00000000000000000000000000000007.0.27320039545922614",
+    "__pregel_tasks": "00000000000000000000000000000005.0.1995123031100019"
   },
   "versions_seen": {
     "__input__": {},
     "__start__": {
-      "__start__": "00000000000000000000000000000001.0.6746563174699575"
+      "__start__": "00000000000000000000000000000001.0.40927868020338043"
     },
     "SummarizationMiddleware.before_model": {
-      "branch:to:SummarizationMiddleware.before_model": "00000000000000000000000000000005.0.980855806607091"
+      "branch:to:SummarizationMiddleware.before_model": "00000000000000000000000000000005.0.1995123031100019"
     },
     "model": {
-      "branch:to:model": "00000000000000000000000000000006.0.6670081846257369"
+      "branch:to:model": "00000000000000000000000000000006.0.2779860737678642"
     },
     "tools": {}
   },
@@ -27,10 +27,10 @@
   ],
   "channel_values": {
     "messages": [
-      "content='what is my current loan, idiot' additional_kwargs={} response_metadata={} id='1206a5bd-b7fc-40dd-b70b-f1023abf0cb7'",
-      "content='' additional_kwargs={'reasoning_content': 'We need to respond politely, empathetic, but firm. User asks \"what is my current loan, idiot\". We need to give current loan status: EMI, minimum payment, remaining principal, interest this month, projected increase if no min payment. Use loan_summary tool with current_month=1, principal=10000, rate=12, tenure=12.', 'tool_calls': [{'id': 'fc_e919a9a8-00d5-49b3-8186-8ba940530570', 'function': {'arguments': '{\"current_month\":1,\"principal\":10000,\"rate\":12,\"tenure\":12}', 'name': 'loan_summary'}, 'type': 'function'}]} response_metadata={'token_usage': {'completion_tokens': 129, 'prompt_tokens': 3263, 'total_tokens': 3392, 'completion_time': 0.268677292, 'completion_tokens_details': {'reasoning_tokens': 74}, 'prompt_time': 0.142708, 'prompt_tokens_details': None, 'queue_time': 0.158787599, 'total_time': 0.411385292}, 'model_name': 'openai/gpt-oss-120b', 'system_fingerprint': 'fp_974392087a', 'service_tier': 'on_demand', 'finish_reason': 'tool_calls', 'logprobs': None, 'model_provider': 'groq'} id='lc_run--019dece0-d3cb-7b42-81c7-03bfa90ed5b2-0' tool_calls=[{'name': 'loan_summary', 'args': {'current_month': 1, 'principal': 10000, 'rate': 12, 'tenure': 12}, 'id': 'fc_e919a9a8-00d5-49b3-8186-8ba940530570', 'type': 'tool_call'}] invalid_tool_calls=[] usage_metadata={'input_tokens': 3263, 'output_tokens': 129, 'total_tokens': 3392, 'output_token_details': {'reasoning': 74}}",
-      "content='{\"month_number\": 1, \"emi\": 888.49, \"interest_this_month\": 100.0, \"minimum_payment\": 100.0, \"remaining_principal\": 10000.0, \"projected_increase_if_no_min_payment\": 100.0, \"projection_months\": 1}' name='loan_summary' id='6fc2d791-c389-4a9e-8841-e3479fbe8413' tool_call_id='fc_e919a9a8-00d5-49b3-8186-8ba940530570'",
-      "content='Your loan details for month\\u202f1 are:\\n\\n- **EMI (best option):**\\u202f\u20b9\\u202f888.49  \\n- **Minimum payment to keep the principal from growing:**\\u202f\u20b9\\u202f100.00  \\n- **Interest due this month:**\\u202f\u20b9\\u202f100.00  \\n- **Outstanding principal:**\\u202f\u20b9\\u202f10,000.00  \\n\\nIf you pay less than the minimum\\u202f\u20b9\\u202f100, the loan balance will increase. Paying the full EMI clears the loan on schedule, while paying only the minimum stops the balance from growing but extends the repayment period and adds more interest overall.  \\n\\nPlease make at least the minimum payment today, and ideally the full EMI, to stay on track.' additional_kwargs={} response_metadata={'token_usage': {'completion_tokens': 145, 'prompt_tokens': 3378, 'total_tokens': 3523, 'completion_time': 0.30397257, 'completion_tokens_details': None, 'prompt_time': 0.167951742, 'prompt_tokens_details': None, 'queue_time': 0.052059524, 'total_time': 0.471924312}, 'model_name': 'openai/gpt-oss-120b', 'system_fingerprint': 'fp_4a19b1544c', 'service_tier': 'on_demand', 'finish_reason': 'stop', 'logprobs': None, 'model_provider': 'groq'} id='lc_run--019dece0-d6c6-7cd2-b268-3398d761116e-0' tool_calls=[] invalid_tool_calls=[] usage_metadata={'input_tokens': 3378, 'output_tokens': 145, 'total_tokens': 3523}"
+      "content='hi, how much is my emi?' additional_kwargs={} response_metadata={} id='f91cbb40-830d-4384-b76b-99f0d5717c4c'",
+      "content='' additional_kwargs={'reasoning_content': 'User wants EMI amount. Need to use loan_summary with current_month=2 (due now). Provide EMI, minimum payment, etc. Use tool.', 'tool_calls': [{'id': 'fc_2894557b-6e55-45a5-8eb8-f100f1c0b550', 'function': {'arguments': '{\"current_month\":2,\"principal\":10000,\"rate\":12,\"tenure\":12}', 'name': 'loan_summary'}, 'type': 'function'}]} response_metadata={'token_usage': {'completion_tokens': 86, 'prompt_tokens': 3266, 'total_tokens': 3352, 'completion_time': 0.183266194, 'completion_tokens_details': {'reasoning_tokens': 31}, 'prompt_time': 0.161409115, 'prompt_tokens_details': None, 'queue_time': 0.051032574, 'total_time': 0.344675309}, 'model_name': 'openai/gpt-oss-120b', 'system_fingerprint': 'fp_a09bde29de', 'service_tier': 'on_demand', 'finish_reason': 'tool_calls', 'logprobs': None, 'model_provider': 'groq'} id='lc_run--019decef-6693-7540-8052-908024446582-0' tool_calls=[{'name': 'loan_summary', 'args': {'current_month': 2, 'principal': 10000, 'rate': 12, 'tenure': 12}, 'id': 'fc_2894557b-6e55-45a5-8eb8-f100f1c0b550', 'type': 'tool_call'}] invalid_tool_calls=[] usage_metadata={'input_tokens': 3266, 'output_tokens': 86, 'total_tokens': 3352, 'output_token_details': {'reasoning': 31}}",
+      "content='{\"month_number\": 2, \"emi\": 888.49, \"interest_this_month\": 92.12, \"minimum_payment\": 92.12, \"remaining_principal\": 9211.51, \"projected_increase_if_no_min_payment\": 92.12, \"projection_months\": 1}' name='loan_summary' id='6426755b-85c9-43f1-a0fb-9b12872537a2' tool_call_id='fc_2894557b-6e55-45a5-8eb8-f100f1c0b550'",
+      "content='Your EMI is **\u20b9\\u202f888.49** per month.  \\n\\nThe minimum payment to keep the loan from growing this month is **\u20b9\\u202f92.12** (the interest amount). Paying the full EMI is the best way to reduce the principal and finish the loan on schedule. If you pay less than the minimum, the loan balance will increase.' additional_kwargs={} response_metadata={'token_usage': {'completion_tokens': 75, 'prompt_tokens': 3381, 'total_tokens': 3456, 'completion_time': 0.163338185, 'completion_tokens_details': None, 'prompt_time': 0.202244438, 'prompt_tokens_details': None, 'queue_time': 0.053565346, 'total_time': 0.365582623}, 'model_name': 'openai/gpt-oss-120b', 'system_fingerprint': 'fp_4a19b1544c', 'service_tier': 'on_demand', 'finish_reason': 'stop', 'logprobs': None, 'model_provider': 'groq'} id='lc_run--019decef-6925-7ec1-a589-9b359da1cad7-0' tool_calls=[] invalid_tool_calls=[] usage_metadata={'input_tokens': 3381, 'output_tokens': 75, 'total_tokens': 3456}"
     ],
     "__pregel_tasks": []
   }

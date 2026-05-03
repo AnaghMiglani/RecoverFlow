@@ -193,7 +193,7 @@ Do NOT mention tools, internal logic, or assumptions.
 
     state = checkpointer.get(config)
 
-    with open("temp_char_structure.json", "w") as f:
-        f.write(json.dumps(state, indent=2, default=str))
+    # with open("temp_char_structure.json", "w") as f:
+    #     f.write(json.dumps(state, indent=2, default=str))
 
     return response["messages"][-1].content

@@ -67,9 +67,10 @@ def simulation_panel():
     u = st.session_state.user
 
     u["name"] = st.text_input("Name", u["name"])
-    u["principal"] = st.number_input("Principal (₹)", value=u["principal"])
-    u["rate"] = st.number_input("Rate (% per annum)", value=u["rate"])
-    u["tenure"] = st.number_input("Tenure (months)", value=u["tenure"])
+
+    st.text_input("Principal (₹)", value=u["principal"], disabled=True)
+    st.text_input("Rate (% per annum)", value=u["rate"], disabled=True)
+    st.text_input("Tenure (months)", value=u["tenure"], disabled=True)
 
     new_month = st.number_input(
         "Current Month",
@@ -164,7 +165,6 @@ def chat_ui():
             st.rerun()
             return
 
-        # 🔥 Update sentiment automatically
         sentiment = sentiment_analysis(user_input)
         st.session_state.user["sentiment"] = sentiment
 

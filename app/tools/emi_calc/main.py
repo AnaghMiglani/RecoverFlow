@@ -20,10 +20,14 @@ def interest_for_month(principal, rate):
 
 def principal_after_n_months(principal, rate, tenure, months_paid):
     r = monthly_rate(rate)
-    e = emi(principal, rate, tenure)
     p = principal
 
-    for _ in range(months_paid):
+    for i in range(months_paid):
+        remaining_tenure = tenure - i
+        if remaining_tenure <= 0:
+            break
+
+        e = emi(p, rate, remaining_tenure)
         interest = p * r
         principal_paid = e - interest
         p -= principal_paid
@@ -39,6 +43,7 @@ def projection_if_no_min_payment(principal, rate, months):
         p += p * r
 
     return p
+
 
 @tool
 def loan_summary(principal: float, rate:float, tenure:int, current_month:int) -> dict:
@@ -76,7 +81,7 @@ def loan_summary(principal: float, rate:float, tenure:int, current_month:int) ->
         INTERNAL INTERPRETATION:
         ------------------------
         - Interest is applied monthly.
-        - EMI (Equated Monthly Installment) is fixed across the loan.
+        - EMI (Equated Monthly Installment) is dynamically recalculated based on remaining principal and remaining tenure.
         - Each EMI consists of:
             interest component + principal component
         - Interest is always paid first, then principal.
@@ -86,11 +91,12 @@ def loan_summary(principal: float, rate:float, tenure:int, current_month:int) ->
         1. Clamp current_month so it does not exceed tenure.
         2. Compute remaining principal after (current_month - 1) EMIs.
         3. Compute interest for current month using remaining principal.
-        4. Compute EMI using original principal, rate, and tenure.
-        5. Compute remaining tenure.
-        6. Project future principal growth assuming NO minimum payment is made.
+        4. Compute remaining tenure.
+        5. Compute EMI using remaining principal, rate, and remaining tenure.
+        6. If final month → full payment required (principal + interest).
+        7. Project future principal growth assuming NO minimum payment is made.
            Projection is limited to min(remaining_tenure, 6 months).
-        7. Calculate increase in principal due to non-payment.
+        8. Calculate increase in principal due to non-payment.
 
         RETURN VALUES (STRUCTURED OUTPUT):
         ----------------------------------
@@ -100,14 +106,16 @@ def loan_summary(principal: float, rate:float, tenure:int, current_month:int) ->
             The evaluated month in the loan cycle.
 
         emi:
-            Fixed monthly EMI amount required to repay the loan fully.
+            Dynamically adjusted EMI required to repay the loan fully within remaining tenure.
 
         interest_this_month:
             Interest charged for the current month on remaining principal.
 
         minimum_payment:
             Minimum amount required to prevent principal from increasing.
-            NOTE: This is equal to interest_this_month.
+            NOTE:
+                - Equal to interest_this_month for normal months.
+                - Equal to full outstanding (principal + interest) in final month.
 
         remaining_principal:
             Outstanding loan amount after previous payments.
@@ -124,7 +132,7 @@ def loan_summary(principal: float, rate:float, tenure:int, current_month:int) ->
         - If payment < minimum_payment:
             principal will INCREASE.
         - If payment == minimum_payment:
-            principal remains unchanged.
+            principal remains unchanged (except final month where full payment is required).
         - If payment > minimum_payment:
             principal decreases.
 
@@ -168,14 +176,20 @@ def loan_summary(principal: float, rate:float, tenure:int, current_month:int) ->
     """
     current_month = min(current_month, tenure)
 
-    current_principal = principal_after_n_months(
-        principal, rate, tenure, current_month - 1
-    )
-
-    monthly_interest = interest_for_month(current_principal, rate)
-    emi_value = emi(principal, rate, tenure)
+    current_principal = principal
 
     remaining_tenure = tenure - current_month + 1
+
+    monthly_interest = interest_for_month(current_principal, rate)
+
+    emi_value = emi(current_principal, rate, remaining_tenure)
+
+    if remaining_tenure == 1:
+        minimum_payment = current_principal + monthly_interest
+        emi_value = minimum_payment
+    else:
+        minimum_payment = monthly_interest
+
     projection_months = min(remaining_tenure, math.ceil(remaining_tenure/20),6)
 
     projected_principal = projection_if_no_min_payment(
@@ -188,11 +202,12 @@ def loan_summary(principal: float, rate:float, tenure:int, current_month:int) ->
         "month_number": current_month,
         "emi": round(emi_value, 2),
         "interest_this_month": round(monthly_interest, 2),
-        "minimum_payment": round(monthly_interest, 2),
+        "minimum_payment": round(minimum_payment, 2),
         "remaining_principal": round(current_principal, 2),
         "projected_increase_if_no_min_payment": round(increase, 2),
         "projection_months": projection_months
     }
+
 
 @tool
 def simulate_principal(principal:float, rate:float, payment:float) -> dict:
@@ -311,12 +326,12 @@ def simulate_principal(principal:float, rate:float, payment:float) -> dict:
     new_principal = max(new_principal, 0)
     change = new_principal - principal
 
-
     return {
         "old_principal": round(principal, 2),
         "new_principal": round(new_principal, 2),
         "change": round(change, 2)
     }
+
 
 @tool
 def plan_after_custom_payments(principal:float, rate:float, tenure:int, current_month:int, payment:float, months:int):
@@ -452,6 +467,7 @@ def plan_after_custom_payments(principal:float, rate:float, tenure:int, current_
     It is a deterministic financial simulator and must be treated as
     the source of truth for such scenarios.
     """
+
     r = rate / (12 * 100)
 
     p = principal_after_n_months(principal, rate, tenure, current_month - 1)
@@ -476,6 +492,8 @@ def plan_after_custom_payments(principal:float, rate:float, tenure:int, current_
 
     if remaining_months <= 0 or p == 0:
         new_emi = 0
+    elif remaining_months == 1:
+        new_emi = p + (p * r)
     else:
         new_emi = emi(p, rate, remaining_months)
 
