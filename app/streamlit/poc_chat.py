@@ -72,18 +72,13 @@ def simulation_panel():
     st.text_input("Rate (% per annum)", value=u["rate"], disabled=True)
     st.text_input("Tenure (months)", value=u["tenure"], disabled=True)
 
-    new_month = st.number_input(
-        "Current Month",
-        min_value=u["current_month"],
-        max_value=u["tenure"],
-        value=min(u["current_month"], u["tenure"])
-    )
+    st.write(f"Current Month: {u['current_month']}")
 
-    if new_month > u["current_month"]:
-        diff = new_month - u["current_month"]
-        st.session_state.init_date += timedelta(days=30 * diff)
-
-    u["current_month"] = new_month
+    if st.button("Next Month"):
+        if u["current_month"] < u["tenure"]:
+            u["current_month"] += 1
+            st.session_state.init_date += timedelta(days=30)
+            st.rerun()
 
     st.write(f"Current Simulated Date: {st.session_state.init_date.strftime('%d-%m-%Y')}")
 
