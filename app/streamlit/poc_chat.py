@@ -47,7 +47,7 @@ def user_form():
     with st.form("user_details"):
         name = st.text_input("Name")
         principal = st.number_input("Principal Amount (₹)", min_value=0.0, value=10000.0)
-        rate = st.number_input("Interest Rate (% per annum)", min_value=0.0, value=12.0)
+        rate = st.number_input("Interest Rate (% per annum) upto 2 decimal places", min_value=0.0, value=12.0)
         tenure = st.number_input("Tenure (months)", min_value=1, value=12)
         current_month = st.number_input("Current Month", min_value=1, value=1)
 
@@ -69,7 +69,7 @@ def user_form():
 
 
 def compute_interest(principal, rate):
-    return principal * (rate / 12 / 100)
+    return round(principal * (rate / 12 / 100),2)
 
 
 def make_payment(amount):
@@ -83,11 +83,12 @@ def make_payment(amount):
 
     interest = compute_interest(user["principal"], user["rate"])
     total_due = user["principal"] + interest
+    total_due=round(total_due,2)
 
     if amount > total_due:
         return False, f"Payment cannot exceed ₹{round(total_due,2)}"
 
-    new_principal = user["principal"] + interest - amount
+    new_principal = round(user["principal"] + interest - amount,2)
     user["principal"] = max(new_principal, 0)
 
     st.session_state.last_payment_month = user["current_month"]
@@ -116,15 +117,14 @@ def make_payment(amount):
         "type": msg_type
     })
 
-    # IMPORTANT FIX → DO NOT RESET EMI FLAG
-    # st.session_state.last_emi_msg_month = None
-
     return True, ""
 
 
 def simulation_panel():
     st.subheader("Simulation")
     u = st.session_state.user
+
+    u["principal"]=round(u["principal"],2)
 
     st.text_input("Name", u["name"])
     st.text_input("Principal (₹)", value=u["principal"], disabled=True)
@@ -139,7 +139,7 @@ def simulation_panel():
             if st.session_state.last_payment_month != u["current_month"]:
                 interest = compute_interest(u["principal"], u["rate"])
                 new_principal = u["principal"] + interest
-                st.session_state.user["principal"] = new_principal
+                st.session_state.user["principal"] = round(new_principal,2)
 
                 st.session_state.chat.append({
                     "role": "assistant",

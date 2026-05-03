@@ -40,7 +40,7 @@ def projection_if_no_min_payment(principal, rate, months):
     p = principal
 
     for _ in range(months):
-        p += p * r
+        p = round(p + p * r, 2)
 
     return p
 
@@ -325,7 +325,7 @@ def simulate_principal(principal:float, rate:float, payment:float) -> dict:
 
 
     new_principal = max(new_principal, 0)
-    change = new_principal - principal
+    change = round(new_principal - principal,2)
 
     return {
         "old_principal": round(principal, 2),
@@ -482,9 +482,9 @@ def plan_after_custom_payments(principal:float, rate:float, tenure:int, current_
         interest = p * r
 
         if payment >= interest:
-            p = p - (payment - interest)
+            p = round(p - (payment - interest), 2)
         else:
-            p = p + (interest - payment)
+            p = round(p + (interest - payment), 2)
 
         p = max(p, 0)
         months_used += 1
