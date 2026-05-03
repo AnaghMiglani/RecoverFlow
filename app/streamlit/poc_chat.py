@@ -36,6 +36,9 @@ def init_state():
     if "last_emi_msg_month" not in st.session_state:
         st.session_state.last_emi_msg_month = None
 
+    if "paid_this_month" not in st.session_state:
+        st.session_state.paid_this_month = False
+
 
 def user_form():
     with st.form("user_details"):
@@ -62,6 +65,37 @@ def user_form():
             st.rerun()
 
 
+def compute_interest(principal, rate):
+    return principal * (rate / 12 / 100)
+
+
+def make_payment(amount):
+    user = st.session_state.user
+
+    interest = compute_interest(user["principal"], user["rate"])
+    total_due = user["principal"] + interest
+
+    if amount > total_due:
+        return False, f"Payment cannot exceed ₹{round(total_due,2)}"
+
+    new_principal = user["principal"] + interest - amount
+    user["principal"] = max(new_principal, 0)
+
+    st.session_state.chat.append({
+        "role": "assistant",
+        "content": f"Payment of ₹{amount} made. New principal is ₹{round(user['principal'],2)}.",
+        "type": "payment_success"
+    })
+
+    st.session_state.paid_this_month = True
+
+    if user["current_month"] < user["tenure"]:
+        user["current_month"] += 1
+        st.session_state.init_date += timedelta(days=30)
+
+    return True, ""
+
+
 def simulation_panel():
     st.subheader("Simulation")
     u = st.session_state.user
@@ -76,19 +110,45 @@ def simulation_panel():
 
     if st.button("Next Month"):
         if u["current_month"] < u["tenure"]:
+
+            if not st.session_state.paid_this_month:
+                interest = compute_interest(u["principal"], u["rate"])
+                u["principal"] += interest
+
+                st.session_state.chat.append({
+                    "role": "assistant",
+                    "content": f"Failure to pay. Principal increased to ₹{round(u['principal'],2)}.",
+                    "type": "payment_fail"
+                })
+
             u["current_month"] += 1
+            st.session_state.paid_this_month = False
             st.session_state.init_date += timedelta(days=30)
             st.rerun()
 
     st.write(f"Current Simulated Date: {st.session_state.init_date.strftime('%d-%m-%Y')}")
 
-    st.text_input(
-        "Sentiment",
-        value=u["sentiment"],
-        disabled=True
-    )
+    st.text_input("Sentiment", value=u["sentiment"], disabled=True)
 
     st.session_state.user = u
+
+
+def payment_panel():
+    st.subheader("Payment")
+
+    if st.session_state.paid_this_month:
+        st.success("Payment already made this month")
+        return
+
+    amount = st.number_input("Enter Payment Amount", min_value=0.0)
+
+    if st.button("Pay"):
+        success, msg = make_payment(amount)
+
+        if not success:
+            st.error(msg)
+        else:
+            st.rerun()
 
 
 def send_auto_message():
@@ -126,12 +186,24 @@ def chat_ui():
 
     for msg in st.session_state.chat:
         if msg.get("type") == "auto":
+            color = "#dcfce7"
+            text_color = "#166534"
+        elif msg.get("type") == "payment_success":
+            color = "#bbf7d0"
+            text_color = "#166534"
+        elif msg.get("type") == "payment_fail":
+            color = "#fed7aa"
+            text_color = "#9a3412"
+        else:
+            color = None
+
+        if color:
             with st.chat_message("assistant"):
                 st.markdown(
                     f"""
                     <div style="
-                        background-color:#dcfce7;
-                        color:#166534;
+                        background-color:{color};
+                        color:{text_color};
                         padding:10px;
                         border-radius:10px;
                         margin-bottom:5px;
@@ -191,11 +263,14 @@ def chat_ui():
 
 def main_layout():
     col1, col2 = st.columns([3, 1])
-    with col2:
-        simulation_panel()
 
     with col1:
         chat_ui()
+
+    with col2:
+        simulation_panel()
+        st.divider()
+        payment_panel()
 
 
 def main():
