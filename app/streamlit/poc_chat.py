@@ -2,9 +2,10 @@ import streamlit as st
 import uuid
 from datetime import datetime, timedelta
 from app.agent.chat import chat_ai
-from app.tools.emi_calc.main import loan_summary
+from app.tools.emi_calc.main import loan_summary, principal_after_n_months
 from app.agent.guardrail import guardrail_llm
 from app.agent.sentiment import sentiment_analysis
+
 
 
 def init_state():
@@ -49,7 +50,7 @@ def user_form():
         principal = st.number_input("Principal Amount (₹)", min_value=0.0, value=10000.0)
         rate = st.number_input("Interest Rate (% per annum) upto 2 decimal places", min_value=0.0, value=12.0)
         tenure = st.number_input("Tenure (months)", min_value=1, value=12)
-        current_month = st.number_input("Current Month", min_value=1, value=1)
+        # current_month = st.number_input("Current Month", min_value=1, value=1)
 
         submitted = st.form_submit_button("Start Simulation")
 
@@ -57,9 +58,10 @@ def user_form():
             st.session_state.user = {
                 "name": name,
                 "principal": principal,
+                "initial_principal": principal,
                 "rate": rate,
                 "tenure": tenure,
-                "current_month": current_month,
+                "current_month": 1,
                 "sentiment": "neutral"
             }
 
@@ -67,6 +69,36 @@ def user_form():
             st.session_state.initialized = True
             st.rerun()
 
+def calculate_risk(user):
+    initial_principal = user["initial_principal"]
+    rate = user["rate"]
+    tenure = user["tenure"]
+    current_month = user["current_month"]
+    actual = user["principal"]
+
+    months_paid = max(0, current_month - 1)
+
+    expected = principal_after_n_months(
+        initial_principal,
+        rate,
+        tenure,
+        months_paid
+    )
+
+    if expected == 0:
+        return "LOW", 0
+
+    deviation = ((actual - expected) / initial_principal) * 100
+
+    deviation = max(0, deviation)
+    deviation=round(deviation,2)
+
+    if deviation >= 7:
+        return "HIGH", round(deviation, 2)
+    elif deviation >= 5:
+        return "MEDIUM", round(deviation, 2)
+    else:
+        return "LOW", round(deviation, 2)
 
 def compute_interest(principal, rate):
     return round(principal * (rate / 12 / 100),2)
@@ -157,6 +189,11 @@ def simulation_panel():
 
     st.write(f"Current Simulated Date: {st.session_state.init_date.strftime('%d-%m-%Y')}")
     st.text_input("Sentiment", value=u["sentiment"], disabled=True)
+
+    risk, deviation = calculate_risk(u)
+
+    st.text_input("Risk", value=risk, disabled=True)
+    st.text_input("Deviation (%)", value=deviation, disabled=True)
 
 
 def payment_panel():
