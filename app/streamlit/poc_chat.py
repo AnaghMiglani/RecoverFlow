@@ -126,6 +126,8 @@ def simulation_panel():
     st.subheader("Simulation")
     u = st.session_state.user
 
+    u["principal"]=round(u["principal"],2)
+
     st.text_input("Name", u["name"])
     st.text_input("Principal (₹)", value=u["principal"], disabled=True)
     st.text_input("Rate (% per annum)", value=u["rate"], disabled=True)
@@ -139,7 +141,7 @@ def simulation_panel():
             if st.session_state.last_payment_month != u["current_month"]:
                 interest = compute_interest(u["principal"], u["rate"])
                 new_principal = u["principal"] + interest
-                st.session_state.user["principal"] = new_principal
+                st.session_state.user["principal"] = round(new_principal,2)
 
                 st.session_state.chat.append({
                     "role": "assistant",
