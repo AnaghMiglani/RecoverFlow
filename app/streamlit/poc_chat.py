@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime, timedelta
 from app.agent.chat import chat_ai
 from app.tools.emi_calc.main import loan_summary
-from app.agent.guardrail import guardrail_llm   # you said you'll adjust import
+from app.agent.guardrail import guardrail_llm
 
 
 def init_state():
@@ -32,9 +32,9 @@ def init_state():
     if "init_date" not in st.session_state:
         st.session_state.init_date = None
 
-    # 🔥 CHANGED: track last EMI message month
     if "last_emi_msg_month" not in st.session_state:
         st.session_state.last_emi_msg_month = None
+
 
 def user_form():
     with st.form("user_details"):
@@ -58,7 +58,6 @@ def user_form():
             }
 
             st.session_state.init_date = datetime.now()
-
             st.session_state.initialized = True
             st.rerun()
 
@@ -110,7 +109,8 @@ def send_auto_message():
 
     st.session_state.chat.append({
         "role": "assistant",
-        "content": msg
+        "content": msg,
+        "type": "auto"
     })
 
     st.session_state.history.append({
@@ -129,8 +129,26 @@ def chat_ui():
         st.session_state.last_emi_msg_month = current_month
 
     for msg in st.session_state.chat:
-        with st.chat_message(msg["role"]):
-            st.write(msg["content"])
+        if msg.get("type") == "auto":
+            with st.chat_message("assistant"):
+                st.markdown(
+                    f"""
+                    <div style="
+                        background-color:#dcfce7;
+                        color:#166534;
+                        padding:10px;
+                        border-radius:10px;
+                        margin-bottom:5px;
+                        font-weight:500;
+                    ">
+                        {msg['content']}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+        else:
+            with st.chat_message(msg["role"]):
+                st.write(msg["content"])
 
     user_input = st.chat_input("Type your message")
 
@@ -140,12 +158,16 @@ def chat_ui():
         if safe == 0:
             st.session_state.chat.append({
                 "role": "assistant",
-                "content": "Your message violates policy. Please try again."
+                "content": "Your message violates policy. Please try again.",
+                "type": "normal"
             })
             st.rerun()
             return
 
-        st.session_state.chat.append({"role": "user", "content": user_input})
+        st.session_state.chat.append({
+            "role": "user",
+            "content": user_input
+        })
 
         response = chat_ai(
             name=st.session_state.user["name"],
@@ -159,7 +181,11 @@ def chat_ui():
             history=st.session_state.history
         )
 
-        st.session_state.chat.append({"role": "assistant", "content": response})
+        st.session_state.chat.append({
+            "role": "assistant",
+            "content": response,
+            "type": "normal"
+        })
 
         st.rerun()
 
