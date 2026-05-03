@@ -116,7 +116,7 @@ This sentiment is later used for **tone-aware response generation**.
 
 The main interaction layer is an LLM-based agent responsible for generating responses.
 
-- Model: `openai/gpt-oss-safeguard-20b` (Via Groq API)
+- Model: `openai/gpt-oss-120b` (Via Groq API)
 - Supports:
   - tool-based reasoning
   - contextual responses
