@@ -244,7 +244,6 @@ def chat_ui():
 
     current_month = st.session_state.user["current_month"]
 
-    # EMI MESSAGE CONTROL (FIXED)
     if (
         st.session_state.last_emi_msg_month != current_month
         and st.session_state.last_payment_month != current_month
@@ -310,8 +309,9 @@ def chat_ui():
             "content": user_input
         })
 
-        # ALWAYS USE LATEST STATE (FIXED)
         u = st.session_state.user
+
+        risk, deviation = calculate_risk(u)
 
         response = chat_ai(
             name=u["name"],
@@ -322,7 +322,8 @@ def chat_ui():
             sentiment=u["sentiment"],
             user_prompt=user_input,
             thread_id=st.session_state.thread_id,
-            history=st.session_state.history
+            history=st.session_state.history,
+            risk=risk
         )
 
         st.session_state.chat.append({
