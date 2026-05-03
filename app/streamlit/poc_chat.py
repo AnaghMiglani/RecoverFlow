@@ -36,8 +36,11 @@ def init_state():
     if "last_emi_msg_month" not in st.session_state:
         st.session_state.last_emi_msg_month = None
 
-    if "paid_this_month" not in st.session_state:
-        st.session_state.paid_this_month = False
+    if "last_payment_month" not in st.session_state:
+        st.session_state.last_payment_month = 0
+
+    if "loan_closed" not in st.session_state:
+        st.session_state.loan_closed = False
 
 
 def user_form():
@@ -72,6 +75,12 @@ def compute_interest(principal, rate):
 def make_payment(amount):
     user = st.session_state.user
 
+    if st.session_state.loan_closed:
+        return False, "Loan already closed."
+
+    if st.session_state.last_payment_month == user["current_month"]:
+        return False, "Payment already made this month"
+
     interest = compute_interest(user["principal"], user["rate"])
     total_due = user["principal"] + interest
 
@@ -81,17 +90,34 @@ def make_payment(amount):
     new_principal = user["principal"] + interest - amount
     user["principal"] = max(new_principal, 0)
 
-    st.session_state.chat.append({
-        "role": "assistant",
-        "content": f"Payment of ₹{amount} made. New principal is ₹{round(user['principal'],2)}.",
-        "type": "payment_success"
-    })
+    st.session_state.last_payment_month = user["current_month"]
 
-    st.session_state.paid_this_month = True
+    # FINAL MONTH LOGIC
+    if user["current_month"] == user["tenure"]:
+        if user["principal"] > 0:
+            msg = f"Payment of ₹{amount} made. Remaining principal is ₹{round(user['principal'],2)}. Bank will contact you shortly."
+            msg_type = "final_due"
+        else:
+            msg = f"Payment of ₹{amount} made. Loan fully repaid. Tenure completed."
+            msg_type = "payment_success"
 
-    if user["current_month"] < user["tenure"]:
+        st.session_state.loan_closed = True
+
+    else:
         user["current_month"] += 1
         st.session_state.init_date += timedelta(days=30)
+
+        msg = f"Payment of ₹{amount} made. New principal is ₹{round(user['principal'],2)}. Month advanced to {user['current_month']}."
+        msg_type = "payment_success"
+
+    st.session_state.chat.append({
+        "role": "assistant",
+        "content": msg,
+        "type": msg_type
+    })
+
+    # IMPORTANT FIX → DO NOT RESET EMI FLAG
+    # st.session_state.last_emi_msg_month = None
 
     return True, ""
 
@@ -100,8 +126,7 @@ def simulation_panel():
     st.subheader("Simulation")
     u = st.session_state.user
 
-    u["name"] = st.text_input("Name", u["name"])
-
+    st.text_input("Name", u["name"])
     st.text_input("Principal (₹)", value=u["principal"], disabled=True)
     st.text_input("Rate (% per annum)", value=u["rate"], disabled=True)
     st.text_input("Tenure (months)", value=u["tenure"], disabled=True)
@@ -111,32 +136,39 @@ def simulation_panel():
     if st.button("Next Month"):
         if u["current_month"] < u["tenure"]:
 
-            if not st.session_state.paid_this_month:
+            if st.session_state.last_payment_month != u["current_month"]:
                 interest = compute_interest(u["principal"], u["rate"])
-                u["principal"] += interest
+                new_principal = u["principal"] + interest
+                st.session_state.user["principal"] = new_principal
 
                 st.session_state.chat.append({
                     "role": "assistant",
-                    "content": f"Failure to pay. Principal increased to ₹{round(u['principal'],2)}.",
+                    "content": f"Failure to pay. Principal increased to ₹{round(new_principal, 2)}.",
                     "type": "payment_fail"
                 })
 
-            u["current_month"] += 1
-            st.session_state.paid_this_month = False
+            st.session_state.user["current_month"] += 1
             st.session_state.init_date += timedelta(days=30)
+
+            # Allow EMI for new month only
+            st.session_state.last_emi_msg_month = None
+
             st.rerun()
 
     st.write(f"Current Simulated Date: {st.session_state.init_date.strftime('%d-%m-%Y')}")
-
     st.text_input("Sentiment", value=u["sentiment"], disabled=True)
-
-    st.session_state.user = u
 
 
 def payment_panel():
     st.subheader("Payment")
 
-    if st.session_state.paid_this_month:
+    user = st.session_state.user
+
+    if st.session_state.loan_closed:
+        st.warning("Loan closed. No further payments allowed.")
+        return
+
+    if st.session_state.last_payment_month == user["current_month"]:
         st.success("Payment already made this month")
         return
 
@@ -169,18 +201,17 @@ def send_auto_message():
         "type": "auto"
     })
 
-    st.session_state.history.append({
-        "time": user["current_month"],
-        "system_message": msg
-    })
-
 
 def chat_ui():
     st.subheader("Chat")
 
     current_month = st.session_state.user["current_month"]
 
-    if st.session_state.last_emi_msg_month != current_month:
+    # EMI MESSAGE CONTROL (FIXED)
+    if (
+        st.session_state.last_emi_msg_month != current_month
+        and st.session_state.last_payment_month != current_month
+    ):
         send_auto_message()
         st.session_state.last_emi_msg_month = current_month
 
@@ -194,6 +225,9 @@ def chat_ui():
         elif msg.get("type") == "payment_fail":
             color = "#fed7aa"
             text_color = "#9a3412"
+        elif msg.get("type") == "final_due":
+            color = "#fecaca"
+            text_color = "#7f1d1d"
         else:
             color = None
 
@@ -227,7 +261,6 @@ def chat_ui():
             st.session_state.chat.append({
                 "role": "assistant",
                 "content": "Your message violates policy. Please try again.",
-                "type": "normal"
             })
             st.rerun()
             return
@@ -240,13 +273,16 @@ def chat_ui():
             "content": user_input
         })
 
+        # ALWAYS USE LATEST STATE (FIXED)
+        u = st.session_state.user
+
         response = chat_ai(
-            name=st.session_state.user["name"],
-            rate=st.session_state.user["rate"],
-            principal=st.session_state.user["principal"],
-            tenure=st.session_state.user["tenure"],
-            current_month=st.session_state.user["current_month"],
-            sentiment=st.session_state.user["sentiment"],
+            name=u["name"],
+            rate=u["rate"],
+            principal=u["principal"],
+            tenure=u["tenure"],
+            current_month=u["current_month"],
+            sentiment=u["sentiment"],
             user_prompt=user_input,
             thread_id=st.session_state.thread_id,
             history=st.session_state.history
@@ -255,7 +291,6 @@ def chat_ui():
         st.session_state.chat.append({
             "role": "assistant",
             "content": response,
-            "type": "normal"
         })
 
         st.rerun()

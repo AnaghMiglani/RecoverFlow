@@ -30,7 +30,7 @@ def principal_after_n_months(principal, rate, tenure, months_paid):
         e = emi(p, rate, remaining_tenure)
         interest = p * r
         principal_paid = e - interest
-        p -= principal_paid
+        p = round(p - principal_paid, 2)
 
     return max(p, 0)
 
@@ -319,9 +319,10 @@ def simulate_principal(principal:float, rate:float, payment:float) -> dict:
     interest = principal * (rate / (12 * 100))
 
     if payment >= interest:
-        new_principal = principal - (payment - interest)
+        new_principal = round(principal - (payment - interest),2)
     else:
-        new_principal = principal + (interest - payment)
+        new_principal = round(principal + (interest - payment),2)
+
 
     new_principal = max(new_principal, 0)
     change = new_principal - principal
