@@ -1,4 +1,9 @@
 import streamlit as st
+# also for deployment
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 import uuid
 from datetime import datetime, timedelta
 from app.agent.chat import chat_ai
@@ -16,11 +21,7 @@ try:
 except:
     pass
 
-# also for deployment
-import sys
-import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 
 def init_state():
