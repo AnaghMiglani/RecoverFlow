@@ -4,10 +4,12 @@ from langgraph.checkpoint.memory import InMemorySaver
 
 from app.tools.emi_calc.main import loan_summary, simulate_principal, plan_after_custom_payments
 
+from app.agent.validator import validator_latest
+
 checkpointer = InMemorySaver()
 
 
-def chat_ai(name: str, rate: float, principal: float, tenure: int, sentiment: str,current_month: int,user_prompt: str, thread_id: str, history: list[dict], risk:str):
+def chat_ai(name: str, rate: float, principal: float, tenure: int, sentiment: str,current_month: int,user_prompt: str, thread_id: str, history: list[dict], risk:str, feedback_loop:str=""):
     from langchain_groq import ChatGroq
     from langchain.messages import HumanMessage
     from dotenv import load_dotenv
@@ -23,6 +25,8 @@ def chat_ai(name: str, rate: float, principal: float, tenure: int, sentiment: st
         history_text.append(f"{i['time']}: {i['system_message']}")
     history_text = "\n".join(history_text) if history_text else "None"
 
+    if (feedback_loop!=""):
+        feedback_loop="## FEEDBACK\n" + feedback_loop
 
     load_dotenv()
 
@@ -45,6 +49,7 @@ Sentiment: {sentiment} [calm/neutral/agitated]
 Risk: {risk} [LOW/MEDIUM/HIGH]
 
 ---
+{feedback_loop}
 
 ## CORE BEHAVIOR
 
@@ -241,4 +246,14 @@ Do NOT mention tools, internal logic, or assumptions.
     # with open("temp_char_structure.json", "w") as f:
     #     f.write(json.dumps(state, indent=2, default=str))
 
-    return response["messages"][-1].content
+    to_validate=response["messages"][-1].content
+    if (validator_latest(to_validate,principal,current_month)):
+        return to_validate
+    else:
+        return chat_ai(name,rate,principal,tenure,sentiment,current_month,user_prompt,thread_id,history,risk,
+                feedback_loop="""
+                Please re-evaluate the previous response using the latest available information relevant to the user’s question. 
+                Do not apologize or mention that this is a correction. This is for internal verification only and should not be presented publicly. 
+                Recalculate and regenerate the answer based on the most current data and context available.
+                """
+        )
