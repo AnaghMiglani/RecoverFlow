@@ -116,7 +116,7 @@ This sentiment is later used for **tone-aware response generation**.
 
 The main interaction layer is an LLM-based agent responsible for generating responses.
 
-- Model: `openai/gpt-oss-safeguard-20b` (Via Groq API)
+- Model: `openai/gpt-oss-120b` (Via Groq API)
 - Supports:
   - tool-based reasoning
   - contextual responses
@@ -218,5 +218,43 @@ pip install -r requirements.txt
 # Run application
 py -m streamlit run app/streamlit/poc_chat.py
 ```
+## Future Improvements
 
+### 1. Tool Execution Validation Layer
+Introduce a validation mechanism to ensure that all tool calls made by the LLM are based on the latest system state.
+
+- Detect stale or inconsistent inputs passed to tools  
+- Re-validate tool outputs against current state  
+- Provide corrective feedback to the LLM when inconsistencies are detected  
+- Prevent decisions based on outdated financial data  
+
+---
+
+### 2. Human-in-the-Loop Escalation (Bank Intervention)
+Introduce a human-in-the-loop workflow that triggers escalation to a simulated bank intervention system under high-risk conditions.
+
+Triggers may include:
+- Risk level reaching **HIGH**
+- User explicitly indicating inability or refusal to pay
+- Loan nearing end of tenure with outstanding balance
+
+On trigger:
+- A "bank contact" function is invoked  
+- The case is flagged for manual review  
+- The conversational agent shifts to a stricter, escalation-aware mode  
+
+
+---
+
+### 3. User-Initiated Query Escalation to Bank
+Allow users to raise queries that can be forwarded to a simulated bank support system.
+
+- User submits a request (e.g., restructuring, delay, clarification)
+- System evaluates if the request is reasonable and relevant
+- Valid requests are forwarded to a "bank support" function
+- Responses can be simulated or handled asynchronously
+
+## Demo
+
+[![Watch Demo](https://img.shields.io/badge/Watch-Demo-blue?style=for-the-badge)](https://drive.google.com/file/d/1vovwQFvfGRJiKmOKQaPxQdBAIxO4he44/view)
 
