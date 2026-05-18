@@ -256,5 +256,5 @@ Allow users to raise queries that can be forwarded to a simulated bank support s
 
 ## Demo
 
-[![Watch Demo](https://img.shields.io/badge/Watch-Demo-blue?style=for-the-badge)](https://drive.google.com/file/d/1vovwQFvfGRJiKmOKQaPxQdBAIxO4he44/view)
+[![Watch Demo](https://img.shields.io/badge/Watch-Demo-blue?style=for-the-badge)](https://drive.google.com/file/d/1Hc3dpuojL2dhdJPwrV7wPrAQxNywgnTz/view?usp=drive_link)
 
