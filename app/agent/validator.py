@@ -52,7 +52,7 @@ Important behavior rules:
 - Ignore tone, wording quality, grammar, and financial correctness beyond value matching.
 
 Examples:
-
+llama
 Input:
 principal = 50000
 current_month = 6
@@ -96,7 +96,7 @@ Output format (strict JSON only):
 """
 
     llm = ChatGroq(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
         temperature=0.1,
         max_retries=2,
         max_tokens=50,
