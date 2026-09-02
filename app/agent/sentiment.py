@@ -84,7 +84,7 @@ Output format (strict JSON only):
 """
 
     llm=ChatGroq(
-        model="llama-3.3-70b-versatile",
+        model="qwen/qwen3.8-27b",
         temperature=0.1,
         max_retries=2,
         max_tokens=50,
