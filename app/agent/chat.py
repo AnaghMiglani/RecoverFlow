@@ -201,6 +201,7 @@ GENERAL RULES:
 
 ## OUTPUT
 
+ALWAYS include current principal amount
 Return ONLY the final answer to the user.
 Do NOT mention tools, internal logic, or assumptions.
 
@@ -213,7 +214,7 @@ Do NOT mention tools, internal logic, or assumptions.
     )
 
     summary_llm = ChatGroq(
-        model="llama-3.1-8b-instant",
+        model="qwen/qwen3.8-27b",
         temperature=0.1,
         max_retries=4,
         api_key=os.getenv("GROQ_API_KEY"),
