@@ -1,6 +1,6 @@
 def validator_latest(message: str, principal:float, current_month:int):
     # temp return true
-    return True
+    # return True
     from langchain_groq import ChatGroq
     from langchain.messages import SystemMessage, HumanMessage
     from dotenv import load_dotenv
@@ -101,7 +101,7 @@ Output format (strict JSON only):
         model="openai/gpt-oss-120b",
         temperature=0.1,
         max_retries=2,
-        max_tokens=50,
+        # max_tokens=50,
         api_key=os.getenv("GROQ_API_KEY"),
     )
     # llm=llm.bind_tools(tools)
@@ -119,9 +119,9 @@ Output format (strict JSON only):
             HumanMessage(content=USER_PROMPT[:1500])
         ]
     })
-
+    # print(response)
     structured = response["structured_response"]
-    # print(structured)
+    print(structured.valid)
     return (structured.valid)
 
 if (__name__ == "__main__"):
