@@ -132,8 +132,14 @@ A short-term memory mechanism (checkpointing) is used to:
 - preserve recent interaction context
 
 ---
+### 4. Agent Output Verifier
+Acts as a validation and safety layer between the Conversational Agent and the final response. It evaluates the agent's output for correctness, appropriateness, and potential leakage of internal or sensitive information. It also verifies that the agent selected and invoked the appropriate tool for the given request.
 
-### 4 Prompt Engineering System
+The verifier is implemented as an LLM-based validator. When validation fails, it returns the failure status along with the underlying reasons and feedback to the Conversational Agent. The agent can then use this feedback to revise its output or correct its tool selection before producing the final response.
+
+---
+
+### 5 Prompt Engineering System
 
 Prompts are dynamically refined using a separate LLM-based prompt rewriting step.
 
@@ -155,7 +161,7 @@ The system enforces strict constraints:
 
 ---
 
-### 5 Financial Computation Layer
+### 6 Financial Computation Layer
 
 All financial logic is implemented as deterministic functions and exposed as tools.
 
@@ -176,7 +182,7 @@ This ensures:
 
 ---
 
-### 6 Risk Evaluation Module
+### 7 Risk Evaluation Module
 
 Risk is computed based on deviation from an expected repayment trajectory.
 
@@ -220,17 +226,7 @@ py -m streamlit run app/streamlit/poc_chat.py
 ```
 ## Future Improvements
 
-### 1. Tool Execution Validation Layer
-Introduce a validation mechanism to ensure that all tool calls made by the LLM are based on the latest system state.
-
-- Detect stale or inconsistent inputs passed to tools  
-- Re-validate tool outputs against current state  
-- Provide corrective feedback to the LLM when inconsistencies are detected  
-- Prevent decisions based on outdated financial data  
-
----
-
-### 2. Human-in-the-Loop Escalation (Bank Intervention)
+### 1. Human-in-the-Loop Escalation (Bank Intervention)
 Introduce a human-in-the-loop workflow that triggers escalation to a simulated bank intervention system under high-risk conditions.
 
 Triggers may include:
@@ -246,7 +242,7 @@ On trigger:
 
 ---
 
-### 3. User-Initiated Query Escalation to Bank
+### 2. User-Initiated Query Escalation to Bank
 Allow users to raise queries that can be forwarded to a simulated bank support system.
 
 - User submits a request (e.g., restructuring, delay, clarification)
@@ -256,5 +252,5 @@ Allow users to raise queries that can be forwarded to a simulated bank support s
 
 ## Demo
 
-[![Watch Demo](https://img.shields.io/badge/Watch-Demo-blue?style=for-the-badge)](https://drive.google.com/file/d/1vovwQFvfGRJiKmOKQaPxQdBAIxO4he44/view)
+[![Watch Demo](https://img.shields.io/badge/Watch-Demo-blue?style=for-the-badge)](https://drive.google.com/file/d/1YRSYzFzKfprzGVuwLFMk6lYdZG618mC0/view?usp=sharing)
 
