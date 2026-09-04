@@ -60,6 +60,11 @@ def init_state():
         st.session_state.loan_closed = False
 
 
+def reset_chat_memory():
+    st.session_state.thread_id = str(uuid.uuid4())
+    st.session_state.history = []
+
+
 def user_form():
     with st.form("user_details"):
         name = st.text_input("Name")
@@ -140,6 +145,7 @@ def make_payment(amount):
     user["principal"] = max(new_principal, 0)
 
     st.session_state.last_payment_month = user["current_month"]
+    reset_chat_memory()
 
     # FINAL MONTH LOGIC
     if user["current_month"] == user["tenure"]:
@@ -182,6 +188,8 @@ def simulation_panel():
     st.write(f"Current Month: {u['current_month']}")
 
     if st.button("Next Month"):
+        reset_chat_memory()
+
         if u["current_month"] < u["tenure"]:
 
             if st.session_state.last_payment_month != u["current_month"]:
